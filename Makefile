@@ -5,3 +5,5 @@ main_o : main.cpp
 	$(CC) -c main.cpp
 upng_o: upng/upng.cpp
 	$(CC) -c upng/upng.cpp
+move_upng: 
+	mv upng/upng.c upng/upng.cpp
