@@ -1,3 +1,8 @@
-all: execu
 CC=clang
-execu: main.o upng/upng.o
+all : main_o upng_o
+	cc -o a.out main.o upng.o
+main_o : main.cpp 
+	cc -c main.cpp
+upng_o: upng/upng.cpp
+	cc -c upng/upng.cpp
+
