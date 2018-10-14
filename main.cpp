@@ -114,6 +114,7 @@ void process_image() {
 }
 
 void grad_dir() {
+    float max_in_image = 0.0f;
     float image_piece [3][3];
     float out_x [3][3];
     float out_y [3][3];
@@ -121,9 +122,9 @@ void grad_dir() {
     for (int i_top = 0; i_top < height; i_top += 3) {
         for (int j_left = 0; j_left < width; j_left +=3) {
 
-            for (int i = i_top; i < i_top + 3; i++) {
-                for (int j = j_left; j < j_left + 3; j++) {
-                    image_piece[i - i_top][j - j_left] = original_image_buffer[index(i, j)];
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    image_piece[i][j] = original_image_buffer[index(i_top + i, j_left + j)];
                 }
             }
             matrix_multiply_3x3(sobel_convolve_x, image_piece, out_x);
@@ -131,6 +132,9 @@ void grad_dir() {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     gradient_buffer[index(i + i_top, j + j_left)] = sqrt(out_x[i][j] * out_x[i][j] + out_y[i][j] * out_y[i][j]);
+                    if (gradient_buffer[index(i + i_top, j + j_left)] > max_in_image) {
+                        max_in_image = gradient_buffer[index(i + i_top, j + j_left)];
+                    }
                     double direction_d = 0.0;
                     double gx = out_x[i][j];
                     if (gx == 0.0) {
@@ -155,11 +159,22 @@ void grad_dir() {
                 }
             }
 
-            for (int i = i_top; i < i_top + 3; i++) {
-                for (int j = j_left; j < j_left + 3; j++) {
-                    original_image_buffer[index(i, j)] = image_piece[i - i_top][j - j_left];
-                }
-            }
+            //for (int i = i_top; i < i_top + 3; i++) {
+            //    for (int j = j_left; j < j_left + 3; j++) {
+            //        original_image_buffer[index(i, j)] = image_piece[i - i_top][j - j_left];
+            //    }
+            //}
+        }
+    }
+
+    float scaling_factor = 1.0f;
+    if (max_in_image != 0.0f) {
+        scaling_factor = 255.0f / max_in_image;
+    }
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            gradient_buffer[index(i, j)] *= scaling_factor;
         }
     }
 }
@@ -171,10 +186,10 @@ void write_image() {
     out_buffer = new unsigned char [width * height];
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            printf("%f ", original_image_buffer[index(i, j)]);
-            out_buffer[index(i, j)] = (unsigned char) original_image_buffer[index(i, j)];
+            // printf("%f ", original_image_buffer[index(i, j)]);
+            out_buffer[index(i, j)] = (unsigned char) gradient_buffer[index(i, j)];
         }
-        printf("\n");
+        //printf("\n");
     }
     FILE* outfile = fopen("out/out.pgm", "wb");
     fprintf(outfile, "P5\n%d\n%d\n255\n", width, height);
@@ -185,6 +200,7 @@ void test_gaussian_filter(){
     load_image();
     convert_image();
     apply_gaussian_filter();
+    grad_dir();
     
     for(int i=0;i<height;i++)
     {
@@ -198,6 +214,7 @@ int main(int argc, char** argv) {
     load_image();
     convert_image();
     //process_image();
+    grad_dir();
     write_image();
     upng_free(upng);
     return 0;
