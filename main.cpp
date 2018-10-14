@@ -3,6 +3,7 @@
 
 upng_t* upng = NULL;
 float* original_image_buffer;
+float* gaussian_filter_buffer;
 float* gradient_buffer;
 
 enum direction {
@@ -43,6 +44,7 @@ void load_image() {
 void convert_image() {
     original_image_buffer = new float [width * height];
     gradient_buffer = new float [width * height];
+    gaussian_filter_buffer = new float [width*height];
     direction_buffer = new direction [width * height];
 
     printf("Converting image\n");
@@ -53,7 +55,30 @@ void convert_image() {
         }
     }
 }
-
+//Gaussian filter on 5 x 5 chunks of the image
+void apply_gaussian_filter(){
+    float gaussian_filter_matrix[5][5] ={
+        {2,4,5,4,2},
+        {4,9,12,9,4},
+        {5,12,15,12,5},
+        {4,9,12,9,4},
+        {2,4,5,4,2}
+    };
+    for(int i=0;i<height;i++)
+    {
+        for(int j=0;j<width;j++)
+        {
+            gaussian_filter_buffer [index(i,j)] = 0;
+            for(int k=0;k<5;k++)
+            {
+                int original_col_iterator = ((j/5)*5)+k;
+                gaussian_filter_buffer[index(i,j)] += original_image_buffer[index(i,original_col_iterator)]*
+                    gaussian_filter_matrix[k][j%5];
+            }
+        }
+    }
+        
+}
 void process_image() {
     printf("Processing image\n");
     // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
@@ -75,6 +100,19 @@ void write_image() {
     }
 }
 
+void test_gaussian_filter(){
+    load_image();
+    convert_image();
+    apply_gaussian_filter();
+    
+    for(int i=0;i<height;i++)
+    {
+        for(int j=0;j<width;j++)
+        {
+            printf("%f, ",gaussian_filter_buffer[index(i,j)]);
+        }
+    }
+}
 int main(int argc, char** argv) {
     load_image();
     convert_image();
