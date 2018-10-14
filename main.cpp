@@ -1,4 +1,5 @@
 #include "upng/upng.h"
+#include <cmath>
 #include <cstdio>
 
 upng_t* upng = NULL;
@@ -22,6 +23,28 @@ inline int index(int i, int j) {
     return (i * width) + j;
 }
 
+float sobel_convolve_x [3][3] = {
+    { 1.0f, 0.0f, -1.0f },
+    { 2.0f, 0.0f, -2.0f },
+    { 1.0f, 0.0f, -1.0f }
+};
+
+float sobel_convolve_y [3][3] = {
+    { 1.0f, 2.0f, 1.0f },
+    { 0.0f, 0.0f, 0.0f },
+    { -1.0f, -2.0f, -1.0f }
+};
+
+// float gx_out [3][3] = {0.0f};
+// float gy_out [3][3] = {0.0f};
+
+void matrix_multiply_3x3(float left[3][3], float right[3][3], float out[3][3]) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            out[i][j] = left[i][0] * right[0][j] + left[i][1] * right[1][j] + left[i][2] * right[2][j];
+        }
+    }
+}
 
 // Load image into upng pointer
 // Set width and height
@@ -49,8 +72,8 @@ void convert_image() {
 
     printf("Converting image\n");
     const unsigned char* png_buffer = upng_get_buffer(upng);
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
             original_image_buffer[index(i, j)] = (float) png_buffer[index(i, j)];
         }
     }
@@ -90,14 +113,72 @@ void process_image() {
     // Step 5: Write to file
 }
 
+void grad_dir() {
+    float image_piece [3][3];
+    float out_x [3][3];
+    float out_y [3][3];
+    direction out_direction [3][3];
+    for (int i_top = 0; i_top < height; i_top += 3) {
+        for (int j_left = 0; j_left < width; j_left +=3) {
+
+            for (int i = i_top; i < i_top + 3; i++) {
+                for (int j = j_left; j < j_left + 3; j++) {
+                    image_piece[i - i_top][j - j_left] = original_image_buffer[index(i, j)];
+                }
+            }
+            matrix_multiply_3x3(sobel_convolve_x, image_piece, out_x);
+            matrix_multiply_3x3(sobel_convolve_y, image_piece, out_y);
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    gradient_buffer[index(i + i_top, j + j_left)] = sqrt(out_x[i][j] * out_x[i][j] + out_y[i][j] * out_y[i][j]);
+                    double direction_d = 0.0;
+                    double gx = out_x[i][j];
+                    if (gx == 0.0) {
+                        direction_d = 90.0;
+                    } else if (gx == -0.0) {
+                        direction_d = -90.0;
+                    } else {
+                        direction_d = atan(out_y[i][j] / out_x[i][j]);
+                    }
+                    int direction_rounded = ((int) round(direction_d / 45.0)) * 45;
+                    direction rounded_direction = EAST;
+                    if (direction_rounded == -90) {
+                        rounded_direction = NORTH;
+                    } else if (direction_rounded == -45) {
+                        rounded_direction = NORTHWEST;
+                    } else if (direction_rounded == 45) {
+                        rounded_direction = NORTHEAST;
+                    } else if (direction_rounded == 90) {
+                        rounded_direction = NORTH;
+                    }
+                    direction_buffer[index(i + i_top, j + j_left)] = rounded_direction;
+                }
+            }
+
+            for (int i = i_top; i < i_top + 3; i++) {
+                for (int j = j_left; j < j_left + 3; j++) {
+                    original_image_buffer[index(i, j)] = image_piece[i - i_top][j - j_left];
+                }
+            }
+        }
+    }
+}
+
+unsigned char* out_buffer;
+
 void write_image() {
     printf("Writing image\n");
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
+    out_buffer = new unsigned char [width * height];
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
             printf("%f ", original_image_buffer[index(i, j)]);
+            out_buffer[index(i, j)] = (unsigned char) original_image_buffer[index(i, j)];
         }
         printf("\n");
     }
+    FILE* outfile = fopen("out/out.pgm", "wb");
+    fprintf(outfile, "P5\n%d\n%d\n255\n", width, height);
+    fwrite(out_buffer, 1, width * height, outfile);
 }
 
 void test_gaussian_filter(){
@@ -116,7 +197,7 @@ void test_gaussian_filter(){
 int main(int argc, char** argv) {
     load_image();
     convert_image();
-    process_image();
+    //process_image();
     write_image();
     upng_free(upng);
     return 0;
