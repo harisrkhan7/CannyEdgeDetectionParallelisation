@@ -167,13 +167,13 @@ void grad_dir() {
 
 unsigned char* out_buffer;
 
-void write_image() {
+void write_image(float* input_buffer) {
     printf("Writing image\n");
     out_buffer = new unsigned char [width * height];
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            printf("%f ", gaussian_filter_buffer[index(i, j)]);
-            out_buffer[index(i, j)] = (unsigned char) gaussian_filter_buffer[index(i, j)];
+            printf("%f ", input_buffer[index(i, j)]);
+            out_buffer[index(i, j)] = (unsigned char) input_buffer[index(i, j)];
         }
         printf("\n");
     }
@@ -186,7 +186,7 @@ void test_gaussian_filter(){
     load_image();
     convert_image();
     apply_gaussian_filter();
-    write_image();
+    write_image(gaussian_filter_buffer);
     for(int i=0;i<height;i++)
     {
         for(int j=0;j<width;j++)
