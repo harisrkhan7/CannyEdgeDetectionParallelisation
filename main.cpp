@@ -98,6 +98,7 @@ void apply_gaussian_filter(){
                 gaussian_filter_buffer[index(i,j)] += original_image_buffer[index(i,original_col_iterator)]*
                     gaussian_filter_matrix[k][j%5];
             }
+            gaussian_filter_buffer[index(i,j)] /= 159;
         }
     }
         
@@ -171,8 +172,8 @@ void write_image() {
     out_buffer = new unsigned char [width * height];
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            printf("%f ", original_image_buffer[index(i, j)]);
-            out_buffer[index(i, j)] = (unsigned char) original_image_buffer[index(i, j)];
+            printf("%f ", gaussian_filter_buffer[index(i, j)]);
+            out_buffer[index(i, j)] = (unsigned char) gaussian_filter_buffer[index(i, j)];
         }
         printf("\n");
     }
@@ -185,7 +186,7 @@ void test_gaussian_filter(){
     load_image();
     convert_image();
     apply_gaussian_filter();
-    
+    write_image();
     for(int i=0;i<height;i++)
     {
         for(int j=0;j<width;j++)
@@ -195,10 +196,11 @@ void test_gaussian_filter(){
     }
 }
 int main(int argc, char** argv) {
-    load_image();
-    convert_image();
-    //process_image();
-    write_image();
-    upng_free(upng);
+test_gaussian_filter();
+//    load_image();
+//    convert_image();
+//    process_image();
+//    write_image();
+//    upng_free(upng);
     return 0;
 }
