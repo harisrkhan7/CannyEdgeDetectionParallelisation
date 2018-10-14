@@ -6,15 +6,22 @@ upng_t* upng = NULL;
 float* original_image_buffer;
 float* gaussian_filter_buffer;
 float* gradient_buffer;
+float* suppression_buffer;
+bool* strong_edge_buffer;
+float* final_buffer;
 
-enum direction {
+float hysteresis_max = 0.0f;
+float low_threshold = 0.08;
+float high_threshold = 0.20;
+
+enum Direction {
     EAST = 0,
     NORTHEAST = 45,
     NORTH = 90,
     NORTHWEST = 135
 };
 
-direction* direction_buffer;
+Direction* direction_buffer;
 
 int width;
 int height;
@@ -46,11 +53,19 @@ void matrix_multiply_3x3(float left[3][3], float right[3][3], float out[3][3]) {
     }
 }
 
+void matrix_multiply_5x5(float left[5][5], float right[5][5], float out[5][5]) {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            out[i][j] = left[i][0] * right[0][j] + left[i][1] * right[1][j] + left[i][2] * right[2][j] + left[i][3] * right[3][j] + left[i][4] * right[4][j];
+        }
+    }
+}
+
 // Load image into upng pointer
 // Set width and height
 void load_image() {
     printf("Loading image\n");
-    upng = upng_new_from_file("img/gazelle.png");
+    upng = upng_new_from_file("img/lion.png");
     if (NULL != upng) {
         upng_decode(upng);
         if (UPNG_EOK == upng_get_error(upng)) {
@@ -66,9 +81,13 @@ void load_image() {
 // Create gradient and direction buffers
 void convert_image() {
     original_image_buffer = new float [width * height];
-    gradient_buffer = new float [width * height];
     gaussian_filter_buffer = new float [width*height];
-    direction_buffer = new direction [width * height];
+    gradient_buffer = new float [width * height];
+    direction_buffer = new Direction [width * height];
+    suppression_buffer = new float [width * height];
+    strong_edge_buffer = new bool [width * height];
+    final_buffer = new float [width * height];
+
 
     printf("Converting image\n");
     const unsigned char* png_buffer = upng_get_buffer(upng);
@@ -103,6 +122,55 @@ void apply_gaussian_filter(){
     }
         
 }
+
+void alt_gaussian() {
+    // Precalculated Gaussian filter kernel
+    float gaussian_filter_matrix[5][5] = {
+        {2, 4, 5, 4, 2},
+        {4, 9, 12, 9, 4},
+        {5, 12, 15, 12, 5},
+        {4, 9, 12, 9, 4},
+        {2, 4, 5, 4, 2}
+    };
+    // Keep track of maximum brightness in output image so we can normalise
+    float max_in_image = 0.0f;
+    // For every top-left corner of a 5x5 sliding window over the input image
+    for (int i_top = 0; i_top < height - 4; i_top++) {
+        for (int j_left = 0; j_left < width - 4; j_left++) {
+            // Sliding window
+            float image_piece [5][5];
+            // Output of matrix multiplication
+            float out [5][5];
+            // Copy the 5x5 window into the image into a local matrix
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                    image_piece[i][j] = original_image_buffer[index(i_top + i, j_left + j)];
+                }
+            }
+            // Matrix multiply the gaussian kernel with the window of the image, into output matrix
+            matrix_multiply_5x5(gaussian_filter_matrix, image_piece, out);
+            // Divide by 159 and then copy the central pixel of the output matrix into the output buffer
+            gaussian_filter_buffer[index(i_top + 2, j_left + 2)] = out[2][2] / 159.0f;
+            // Update maxium brightness
+            if (max_in_image < out[2][2]) {
+                max_in_image = out[2][2];
+            }
+        }
+    }
+    // Normalise to avoid darkness
+    // TODO: NORMALISE AT THE FINAL STEP ONLY
+    max_in_image /= 159.0f;
+    float scaling_factor = 1.0f;
+    if (max_in_image != 0.0f) {
+        scaling_factor = 255.0f / max_in_image;
+    }
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            gaussian_filter_buffer[index(i, j)] *= scaling_factor;
+        }
+    }
+}
+
 void process_image() {
     printf("Processing image\n");
     // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
@@ -119,52 +187,42 @@ void grad_dir() {
     float image_piece [3][3];
     float out_x [3][3];
     float out_y [3][3];
-    direction out_direction [3][3];
-    for (int i_top = 0; i_top < height; i_top += 3) {
-        for (int j_left = 0; j_left < width; j_left +=3) {
+    Direction out_direction [3][3];
+    for (int i_top = 0; i_top < height - 2; i_top++) {
+        for (int j_left = 0; j_left < width - 2; j_left++) {
 
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    image_piece[i][j] = original_image_buffer[index(i_top + i, j_left + j)];
+                    image_piece[i][j] = gaussian_filter_buffer[index(i_top + i, j_left + j)];
                 }
             }
             matrix_multiply_3x3(sobel_convolve_x, image_piece, out_x);
             matrix_multiply_3x3(sobel_convolve_y, image_piece, out_y);
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    gradient_buffer[index(i + i_top, j + j_left)] = sqrt(out_x[i][j] * out_x[i][j] + out_y[i][j] * out_y[i][j]);
-                    if (gradient_buffer[index(i + i_top, j + j_left)] > max_in_image) {
-                        max_in_image = gradient_buffer[index(i + i_top, j + j_left)];
-                    }
-                    double direction_d = 0.0;
-                    double gx = out_x[i][j];
-                    if (gx == 0.0) {
-                        direction_d = 90.0;
-                    } else if (gx == -0.0) {
-                        direction_d = -90.0;
-                    } else {
-                        direction_d = atan(out_y[i][j] / out_x[i][j]);
-                    }
-                    int direction_rounded = ((int) round(direction_d / 45.0)) * 45;
-                    direction rounded_direction = EAST;
-                    if (direction_rounded == -90) {
-                        rounded_direction = NORTH;
-                    } else if (direction_rounded == -45) {
-                        rounded_direction = NORTHWEST;
-                    } else if (direction_rounded == 45) {
-                        rounded_direction = NORTHEAST;
-                    } else if (direction_rounded == 90) {
-                        rounded_direction = NORTH;
-                    }
-                    direction_buffer[index(i + i_top, j + j_left)] = rounded_direction;
-                }
+            gradient_buffer[index(i_top + 1, j_left + 1)] = sqrt(out_x[1][1] * out_x[1][1] + out_y[1][1] * out_y[1][1]);
+            if (gradient_buffer[index(i_top + 1, j_left + 1)] > max_in_image) {
+                max_in_image = gradient_buffer[index(i_top + 1, j_left + 1)];
             }
-
-            //for (int i = i_top; i < i_top + 3; i++) {
-            //    for (int j = j_left; j < j_left + 3; j++) {
-            //        original_image_buffer[index(i, j)] = image_piece[i - i_top][j - j_left];
-            //    }
-            //}
+            double direction_d = 0.0;
+            double gx = out_x[1][1];
+            if (gx == 0.0) {
+                direction_d = 90.0;
+            } else if (gx == -0.0) {
+                direction_d = -90.0;
+            } else {
+                direction_d = atan2(out_y[1][1], out_x[1][1]);
+            }
+            int direction_i = ((int) round(direction_d / 45.0)) * 45;
+            Direction direction = EAST;
+            if (direction_i == -90) {
+                direction = NORTH;
+            } else if (direction_i == -45) {
+                direction = NORTHWEST;
+            } else if (direction_i == 45) {
+                direction = NORTHEAST;
+            } else if (direction_i == 90) {
+                direction = NORTH;
+            }
+            direction_buffer[index(i_top + 1, j_left + 1)] = direction;
         }
     }
 
@@ -176,6 +234,107 @@ void grad_dir() {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             gradient_buffer[index(i, j)] *= scaling_factor;
+        }
+    }
+}
+
+void suppress() {
+    float gradient_piece [3][3];
+    for (int i_top = 2; i_top < height - 2 - 2; i_top++) {
+        for (int j_left = 2; j_left < width - 2 - 2; j_left++) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    gradient_piece[i][j] = gradient_buffer[index(i_top + i, j_left + j)];
+                }
+            }
+            float compare_one, compare_two;
+            Direction direction = direction_buffer[index(i_top + 1, j_left + 1)];
+            if (direction == EAST) {
+                compare_one = gradient_piece[1][0];
+                compare_two = gradient_piece[1][2];
+            } else if (direction == NORTHEAST) {
+                compare_one = gradient_piece[2][0];
+                compare_two = gradient_piece[0][2];
+            } else if (direction == NORTH) {
+                compare_one = gradient_piece[0][1];
+                compare_two = gradient_piece[2][1];
+            } else if (direction == NORTHWEST) {
+                compare_one = gradient_piece[0][0];
+                compare_two = gradient_piece[2][2];
+            }
+            float current_gradient = gradient_piece[1][1];
+            if (current_gradient >= compare_one && current_gradient >= compare_two) {
+                suppression_buffer[index(i_top + 1, j_left + 1)] = current_gradient;
+            } else {
+                suppression_buffer[index(i_top + 1, j_left + 1)] = 0.0f;
+            }
+
+            if (hysteresis_max < current_gradient) {
+                hysteresis_max = current_gradient;
+            }
+        }
+    }
+}
+
+int safe_get_is_strong(int i, int j) {
+    if (i < 0) {
+        return false;
+    }
+    if (i >= height) {
+        return false;
+    }
+    if (j < 0) {
+        return false;
+    }
+    if (j >= width) {
+        return false;
+    }
+    return strong_edge_buffer[index(i, j)];
+}
+
+bool has_strong_neighbour(int i, int j) {
+    for (int q = -1; q < 2; q++) {
+        for (int r = -1; r < 2; r++) {
+            if (q == 0 && r == 0) {
+                continue;
+            }
+            if (safe_get_is_strong(i + q, j + r)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void hysteresis() {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            float current_pixel = suppression_buffer[index(i, j)];
+            if (current_pixel >= high_threshold * hysteresis_max) {
+                strong_edge_buffer[index(i, j)] = true;
+            } else {
+                strong_edge_buffer[index(i, j)] = false;
+            }
+            if (current_pixel < low_threshold * hysteresis_max) {
+                suppression_buffer[index(i, j)] = 0.0f;
+            }
+        }
+    }
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            float current_pixel = suppression_buffer[index(i, j)];
+            if (current_pixel > 0.0f) {
+                if (strong_edge_buffer[index(i, j)]) {
+                    final_buffer[index(i, j)] = 255.0f;
+                } else {
+                    if (has_strong_neighbour(i, j)) {
+                        final_buffer[index(i, j)] = 255.0f;
+                    } else {
+                        final_buffer[index(i, j)] = 0.0f;
+                    }
+                }
+            }
+
         }
     }
 }
@@ -211,11 +370,15 @@ void test_gaussian_filter(){
     }
 }
 int main(int argc, char** argv) {
-test_gaussian_filter();
-//    load_image();
-//    convert_image();
-//    process_image();
-//    write_image();
+// test_gaussian_filter();
+    load_image();
+    convert_image();
+    alt_gaussian();
+    grad_dir();
+    suppress();
+    hysteresis();
+    // process_image();
+    write_image(final_buffer);
 //    upng_free(upng);
     return 0;
 }
