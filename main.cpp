@@ -21,6 +21,28 @@ inline int index(int i, int j) {
     return (i * width) + j;
 }
 
+float sobel_convolve_x [3][3] = {
+    { 1.0f, 0.0f, -1.0f },
+    { 2.0f, 0.0f, -2.0f },
+    { 1.0f, 0.0f, -1.0f }
+};
+
+float sobel_convolve_y [3][3] = {
+    { 1.0f, 2.0f, 1.0f },
+    { 0.0f, 0.0f, 0.0f },
+    { -1.0f, -2.0f, -1.0f }
+};
+
+// float gx_out [3][3] = {0.0f};
+// float gy_out [3][3] = {0.0f};
+
+void matrix_multiply_3x3(float left[3][3], float right[3][3], float out[3][3]) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            out[i][j] = left[i][0] * right[0][j] + left[i][1] * right[1][j] + left[i][2] * right[2][j];
+        }
+    }
+}
 
 // Load image into upng pointer
 // Set width and height
@@ -63,6 +85,27 @@ void process_image() {
     // Step 3: Do the non-maximum suppression
     // Step 4: Thresholding (pixel by pixel)
     // Step 5: Write to file
+}
+
+void grad_dir() {
+    float image_piece [3][3];
+    float out [3][3];
+    for (int i_top = 0; i_top < height; i_top += 3) {
+        for (int j_left = 0; j_left < width; j_left +=3) {
+
+            for (int i = i_top; i < i_top + 3; i++) {
+                for (int j = j_left; j < j_left + 3; j++) {
+                    image_piece[i - i_top][j - j_left] = original_image_buffer[index(i, j)];
+                }
+            }
+            matrix_multiply_3x3(sobel_convolve_x, image_piece, out);
+            for (int i = i_top; i < i_top + 3; i++) {
+                for (int j = j_left; j < j_left + 3; j++) {
+                    original_image_buffer[index(i, j)] = image_piece[i - i_top][j - j_left];
+                }
+            }
+        }
+    }
 }
 
 void write_image() {
