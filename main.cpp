@@ -1,6 +1,8 @@
 #include "upng/upng.h"
 #include <cmath>
 #include <cstdio>
+#include <mpi.h>
+#include <unistd.h>
 
 upng_t* upng = NULL;
 float* original_image_buffer;
@@ -25,6 +27,9 @@ Direction* direction_buffer;
 
 int width;
 int height;
+
+int global_height;
+int global_width;
 
 inline int index(int i, int j) {
     return (i * width) + j;
@@ -79,14 +84,19 @@ void load_image() {
 
 // Convert the upng image into an array of floats;
 // Create gradient and direction buffers
+
+void prepare_memory() {
+    original_image_buffer = new float [width * (height + 6)];
+    gaussian_filter_buffer = new float [width * (height + 6)];
+    gradient_buffer = new float [width * (height + 6)];
+    direction_buffer = new Direction [width * (height + 6)];
+    suppression_buffer = new float [width * (height + 6)];
+    strong_edge_buffer = new bool [width * (height + 6)];
+    final_buffer = new float [width * (height + 6)];
+}
+
 void convert_image() {
-    original_image_buffer = new float [width * height];
-    gaussian_filter_buffer = new float [width*height];
-    gradient_buffer = new float [width * height];
-    direction_buffer = new Direction [width * height];
-    suppression_buffer = new float [width * height];
-    strong_edge_buffer = new bool [width * height];
-    final_buffer = new float [width * height];
+    
 
 
     printf("Converting image\n");
@@ -169,17 +179,6 @@ void alt_gaussian() {
             gaussian_filter_buffer[index(i, j)] *= scaling_factor;
         }
     }
-}
-
-void process_image() {
-    printf("Processing image\n");
-    // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
-    // Create array #2 (floats) for gradient and array #3 (chars) for direction
-    // Step 1: 5 * 5 guassian blurring
-    // Step 2: Get gradient and direction arrays
-    // Step 3: Do the non-maximum suppression
-    // Step 4: Thresholding (pixel by pixel)
-    // Step 5: Write to file
 }
 
 void grad_dir() {
@@ -341,7 +340,7 @@ void hysteresis() {
 
 unsigned char* out_buffer;
 
-void write_image(float* input_buffer) {
+void write_image(float* input_buffer, unsigned int leave_out, bool append) {
     printf("Writing image\n");
     out_buffer = new unsigned char [width * height];
     for (int i = 0; i < height; i++) {
@@ -351,16 +350,26 @@ void write_image(float* input_buffer) {
         }
         //printf("\n");
     }
-    FILE* outfile = fopen("out/out.pgm", "wb");
-    fprintf(outfile, "P5\n%d\n%d\n255\n", width, height);
-    fwrite(out_buffer, 1, width * height, outfile);
+    
+    if (append == false) {
+        FILE* outfile = fopen("out/out.pgm", "wb");
+        fprintf(outfile, "P5\n%d\n%d\n255\n", global_width, global_height);
+        fwrite(out_buffer, 1, width * (height - leave_out), outfile);
+        fclose(outfile);
+    } else {
+        FILE* outfile = fopen("out/out.pgm", "ab");
+        fwrite(out_buffer + (leave_out * width), 1, width * (height -  leave_out), outfile);
+        fclose(outfile);
+    }
+    
 }
 
 void test_gaussian_filter(){
     load_image();
+    prepare_memory();
     convert_image();
     apply_gaussian_filter();
-    write_image(gaussian_filter_buffer);
+//    write_image(gaussian_filter_buffer);
     for(int i=0;i<height;i++)
     {
         for(int j=0;j<width;j++)
@@ -369,16 +378,277 @@ void test_gaussian_filter(){
         }
     }
 }
-int main(int argc, char** argv) {
-// test_gaussian_filter();
+
+void process_image() {
+    printf("Processing image\n");
+    // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
+    // Create array #2 (floats) for gradient and array #3 (chars) for direction
+    // Step 1: 5 * 5 guassian blurring
+    // Step 2: Get gradient and direction arrays
+    // Step 3: Do the non-maximum suppression
+    // Step 4: Thresholding (pixel by pixel)
+    // Step 5: Write to file
     load_image();
+    prepare_memory();
     convert_image();
     alt_gaussian();
     grad_dir();
     suppress();
     hysteresis();
-    // process_image();
-    write_image(final_buffer);
-//    upng_free(upng);
+}
+
+int main(int argc, char** argv) {
+    // Initialize the MPI environment
+    MPI_Init(&argc,&argv);
+    
+    // Get the number of processes
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    
+    //For termination
+    int commSize = world_size;
+
+    // Get the rank of the process
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    
+    MPI_Status status;
+    
+    //Extra rows for neighbourhood operation
+    int num_extra_rows = 3;
+    
+    //Number of rows per process
+    int num_rows_per_process;
+    
+    //Total Items to Recv 
+    int total_items_to_recv;
+    
+    // If the world size is 1, just do everything in this process and then exit
+    // This MUST be before the world size stuff below
+    if (world_size == 1) {
+        printf("\nWorld Size is 1!");
+        if (world_rank == 0) {
+            process_image();
+            write_image(final_buffer,0,false);
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Finalize();
+        return 0;
+    }
+    
+    if(world_rank == 0){
+        printf("\nRank =0 --> Starting!");
+        load_image();
+        prepare_memory();
+        convert_image();
+        global_height = height;
+        global_width = width;
+        
+        int resolution[2] = {width,height};
+        
+        printf("Sending broadcast message!");
+        
+        MPI_Bcast(&resolution,2,MPI_INT,world_rank,MPI_COMM_WORLD);
+        
+        num_rows_per_process = height/world_size;
+        
+//        original_image_buffer = new float[(100*100)];
+//        printf("Populating the image");
+//        for(float i=0;i<(100*100);i++)
+//        {
+//            original_image_buffer[(int)i]=i;
+//        }
+        
+        printf("\nAfter Convert Image!");
+        //Divide and send data to every processor 
+        int num_rows_to_send = num_rows_per_process + (2 * num_extra_rows);
+        
+        int total_items_to_send = num_rows_to_send * width;
+        
+        int original_buffer_index = (num_rows_per_process*width) - (num_extra_rows*width);
+        
+        
+        float *sending_buffer;
+        
+        int total_processors;
+        
+        if((height % world_size)==0)
+        {
+            total_processors = world_size;            
+        }
+        else{
+            total_processors = world_size - 1;
+        }
+
+        printf("\nOriginal Buffer Index Before %d",original_buffer_index);
+        //Start from rank 1 as rank 0 is master process itself
+        //Leave the last process out in case not completely divisible
+        for(int destination = 1;destination<total_processors;destination++){
+            if(destination == (world_size -1))
+            {
+                total_items_to_send -= (2*num_extra_rows*width);
+            }
+            sending_buffer = new float[total_items_to_send];
+            for(int i=0;i<total_items_to_send;i++,original_buffer_index++)
+            {
+                sending_buffer[i] = original_image_buffer[original_buffer_index];
+            }
+            
+            printf("\nSending buffer to:%d of length %d",destination,total_items_to_send);
+            MPI_Send(sending_buffer, total_items_to_send, MPI_FLOAT, destination, 0, MPI_COMM_WORLD);
+            printf("\nSent buffer to:%d",destination);
+            if(destination != (world_size -1))
+            {
+                original_buffer_index -= 2 * num_extra_rows * width;     
+            }
+            printf("\nOriginal Buffer Index After %d",original_buffer_index);
+        }
+        
+        //Send last processor more work if it can't be evenly divided
+        if((height%world_size)!=0)
+        {
+            printf("\nLast Processor will get uneven load!");
+            
+            //Give the remaining work to the last processor
+            int last_processor_rank = world_rank - 1;
+        
+            int num_rows_for_last_processor = height - (num_rows_per_process * (world_size -  1))+num_extra_rows;
+            total_items_to_send = num_rows_for_last_processor * width;
+            sending_buffer = new float[total_items_to_send];
+            printf("\nSending Buffer size %d",total_items_to_send);
+            
+            for(int i=0;i<total_items_to_send;i++,original_buffer_index++)
+            {
+                sending_buffer[i] = original_image_buffer[original_buffer_index];
+            }
+            
+            int destination = world_size - 1;
+            MPI_Send(sending_buffer, total_items_to_send, MPI_FLOAT, destination, 0, MPI_COMM_WORLD);
+            printf("\nSent Buffer size %d to rank %d",total_items_to_send,destination);
+        }
+        
+//        height = num_rows_per_process;
+        //Compute Master Chunk 
+        printf("\nComputing Master");
+        alt_gaussian();
+        grad_dir();
+        suppress();
+        hysteresis();
+        //Write Results and Send Ack to Next Process
+        
+        write_image(final_buffer,num_extra_rows,false);
+        
+        
+        MPI_Barrier(MPI_COMM_WORLD);
+        int ack = 0;
+        MPI_Send(&ack, 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
+        
+        //Wait for all processes to finish and terminate
+        MPI_Barrier(MPI_COMM_WORLD);
+        printf("\n Finalising Master");
+        MPI_Finalize();
+        }
+    else if(world_rank == world_size-1){
+        printf("\nReceiving Broadcast!");
+        int resolution[2];
+        MPI_Bcast(&resolution,2 ,MPI_INT ,0, MPI_COMM_WORLD);
+        width = resolution[0];
+        height = resolution[1];
+        num_rows_per_process = height/world_size;
+        
+        if((height%world_size)!=0)
+        {
+            //Give the remaining work to the last processor
+            int num_rows_for_last_processor = height - (num_rows_per_process * (world_size -  1));
+            num_rows_for_last_processor += num_extra_rows;
+            
+            
+            total_items_to_recv = num_rows_for_last_processor * width;
+            
+            height = num_rows_for_last_processor;
+        }
+        else
+        {
+            total_items_to_recv = ((height/world_size)+num_extra_rows)*width;
+            
+            height = num_rows_per_process + num_extra_rows;
+        }
+        
+        prepare_memory();
+        //original_image_buffer = new float[total_items_to_recv];
+        printf("\nProcess %d attempting to receive %d",world_rank,total_items_to_recv);
+        MPI_Recv(original_image_buffer, total_items_to_recv, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, &status);
+        printf("\nProcess %d received %d",world_rank,total_items_to_recv);
+        //Compute Image 
+        
+        printf("\nComputing Last ");
+        
+        alt_gaussian();
+        grad_dir();
+        suppress();
+        hysteresis();
+        
+        //Wait for Ack from Previous Process
+        MPI_Barrier(MPI_COMM_WORLD);
+        int ack=0;
+        MPI_Recv(&ack, 1, MPI_INT, (world_rank-1), 1, MPI_COMM_WORLD, &status);
+        
+        //Write Results 
+        
+        write_image(final_buffer,num_extra_rows,true);
+        
+        //Wait for all processes to finish and terminate
+        MPI_Barrier(MPI_COMM_WORLD);
+        printf("\n Finalising Last");
+        MPI_Finalize();
+        
+        
+    }
+    else
+    {
+        int resolution[2];
+        MPI_Bcast(&resolution,2 ,MPI_INT ,0, MPI_COMM_WORLD);
+        width = resolution[0];
+        height = resolution[1];
+        num_rows_per_process = height/world_size;
+        
+        printf("\nProcess %d started!",world_rank);
+        printf("\n Height:%d, WorldSize:%d",height, world_size);
+        total_items_to_recv = (height/world_size)*width;
+        total_items_to_recv += (2*num_extra_rows * width);
+        printf("\nTotal Items to Receive %d",total_items_to_recv);
+        height = num_rows_per_process;
+        prepare_memory();
+        //original_image_buffer = new float[total_items_to_recv];
+        printf("\nProcess %d attempting to receive %d",world_rank,total_items_to_recv);
+        MPI_Recv(original_image_buffer, total_items_to_recv, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, &status);
+        printf("\nProcess %d received %d",world_rank,total_items_to_recv);
+        
+        //Compute Image
+        printf("\nComputing Others");
+        alt_gaussian();
+        grad_dir();
+        suppress();
+        hysteresis();
+        
+        
+        //Wait for Ack from Previous Process
+        MPI_Barrier(MPI_COMM_WORLD);
+        int ack=0;
+        MPI_Recv(&ack, 1, MPI_INT, (world_rank-1), 1, MPI_COMM_WORLD, &status);
+        
+        //Write the file
+         write_image(final_buffer,num_extra_rows,true);
+        //Send Ack to next process
+        ack = 1;
+        MPI_Send(&ack, 1, MPI_INT, (world_rank+1), 1, MPI_COMM_WORLD);
+        
+        //Wait for all processes to finish and terminate
+        MPI_Barrier(MPI_COMM_WORLD);
+        printf("\n Finalising Rank %d",world_rank);
+        MPI_Finalize();
+    }
+    
+    
     return 0;
 }
