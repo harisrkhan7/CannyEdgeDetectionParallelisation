@@ -9,7 +9,7 @@ module load GCC/6.2.0
 
 make
 
-num_threads_arr=("1" "2" "3" "4", "5", "6", "7" "8")
+num_threads_arr=("1" "2" "3" "4" "5" "6" "7" "8")
 filename_arr=("img/smallwheel.png" "img/wheel.png" "img/baboon.png" "img/elephant.png" "img/lion.png" "img/gazelle.png" "img/giraffe.png")
 
 echo "filename,width,height,size,omp_num_threads,time(s)"

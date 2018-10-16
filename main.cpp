@@ -27,9 +27,12 @@ int height;
 float low_threshold = 0.12;
 float high_threshold = 0.24;
 
+#ifndef OUR_INDEX
+#define OUR_INDEX
 inline int index(int i, int j) {
     return (i * width) + j;
 }
+#endif
 
 void matrix_multiply_3x3(float left[3][3], float right[3][3], float out[3][3]) {
     for (int i = 0; i < 3; i++) {
@@ -40,8 +43,8 @@ void matrix_multiply_3x3(float left[3][3], float right[3][3], float out[3][3]) {
 }
 
 void matrix_multiply_5x5(float left[5][5], float right[5][5], float out[5][5]) {
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 5; j++) {
+    for (int i = 2; i < 3; i++) {
+        for (int j = 2; j < 3; j++) {
             out[i][j] = left[i][0] * right[0][j] + left[i][1] * right[1][j] + left[i][2] * right[2][j] + left[i][3] * right[3][j] + left[i][4] * right[4][j];
         }
     }
@@ -149,7 +152,7 @@ void alt_gaussian() {
     if (max_in_image != 0.0f) {
         scaling_factor = 255.0f / max_in_image;
     }
-	#pragma omp parallel for shared(height, width, gaussian_filter_buffer, scaling_factor) schedule(dynamic)
+    #pragma omp parallel for shared(height, width, gaussian_filter_buffer, scaling_factor) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             gaussian_filter_buffer[index(i, j)] *= scaling_factor;
@@ -228,7 +231,7 @@ void grad_dir() {
     if (max_in_image != 0.0f) {
         scaling_factor = 255.0f / max_in_image;
     }
-	#pragma omp parallel for shared(height, width, gaussian_filter_buffer, scaling_factor) schedule(dynamic)
+    #pragma omp parallel for shared(height, width, gaussian_filter_buffer, scaling_factor) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             gradient_buffer[index(i, j)] *= scaling_factor;
@@ -343,7 +346,7 @@ unsigned char* out_buffer;
 void write_image(float* input_buffer) {
     fprintf(stderr, "Writing image\n");
     out_buffer = new unsigned char [width * height];
-	#pragma omp parallel for shared(height, width, out_buffer, input_buffer) schedule(dynamic)
+    #pragma omp parallel for shared(height, width, out_buffer, input_buffer) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             // fprintf(stderr, "%f ", input_buffer[index(i, j)]);
@@ -357,7 +360,7 @@ void write_image(float* input_buffer) {
     } else {
         fprintf(outfile, "P5\n%d\n%d\n255\n", width, height);
         fwrite(out_buffer, 1,  width * height, outfile);
-		fclose(outfile);
+        fclose(outfile);
     }
 }
 
@@ -377,22 +380,22 @@ void test_gaussian_filter(){
 int main(int argc, char** argv) {
 // test_gaussian_filter();
     double start_time = omp_get_wtime();
-	input_filename = argv[1];
-	if (argc == 4) {
-		float input_low = atof(argv[2]);
-		if (input_low > 0.0) {
-			low_threshold = input_low;
-		}
-		float input_high = atof(argv[3]);
-		if (input_high > 0.0) {
-			if (input_high > low_threshold) {
-				high_threshold = input_high;
-			} else {
-				high_threshold = 1.1 * low_threshold;
-				high_threshold = std::min(high_threshold, 1.0f);
-			}
-		}
-	}
+    input_filename = argv[1];
+    if (argc == 4) {
+        float input_low = atof(argv[2]);
+        if (input_low > 0.0) {
+            low_threshold = input_low;
+        }
+        float input_high = atof(argv[3]);
+        if (input_high > 0.0) {
+            if (input_high > low_threshold) {
+                high_threshold = input_high;
+            } else {
+                high_threshold = 1.1 * low_threshold;
+                high_threshold = std::min(high_threshold, 1.0f);
+            }
+        }
+    }
     load_image();
     convert_image();
     alt_gaussian();
@@ -401,7 +404,7 @@ int main(int argc, char** argv) {
     hysteresis();
     // process_image();
     write_image(final_buffer);
-	printf("%.2f\n", omp_get_wtime() - start_time);
+    printf("%.2f\n", omp_get_wtime() - start_time);
 //    upng_free(upng);
     return 0;
 }
