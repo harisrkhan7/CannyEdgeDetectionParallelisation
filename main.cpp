@@ -1,6 +1,8 @@
 #include "upng/upng.h"
+#include "omp.h"
 #include <cmath>
 #include <cstdio>
+#include <algorithm>
 
 upng_t* upng = NULL;
 float* original_image_buffer;
@@ -11,8 +13,8 @@ bool* strong_edge_buffer;
 float* final_buffer;
 
 float hysteresis_max = 0.0f;
-float low_threshold = 0.08;
-float high_threshold = 0.20;
+float low_threshold = 0.12;
+float high_threshold = 0.24;
 
 enum Direction {
     EAST = 0,
@@ -30,17 +32,6 @@ inline int index(int i, int j) {
     return (i * width) + j;
 }
 
-float sobel_convolve_x [3][3] = {
-    { 1.0f, 0.0f, -1.0f },
-    { 2.0f, 0.0f, -2.0f },
-    { 1.0f, 0.0f, -1.0f }
-};
-
-float sobel_convolve_y [3][3] = {
-    { 1.0f, 2.0f, 1.0f },
-    { 0.0f, 0.0f, 0.0f },
-    { -1.0f, -2.0f, -1.0f }
-};
 
 // float gx_out [3][3] = {0.0f};
 // float gy_out [3][3] = {0.0f};
@@ -134,13 +125,14 @@ void alt_gaussian() {
     };
     // Keep track of maximum brightness in output image so we can normalise
     float max_in_image = 0.0f;
+    // Sliding window
+    float image_piece [5][5];
+    // Output of matrix multiplication
+    float out [5][5];
     // For every top-left corner of a 5x5 sliding window over the input image
+	#pragma omp parallel for shared(height, width, original_image_buffer, gaussian_filter_buffer, gaussian_filter_matrix) private(image_piece, out) reduction(max:max_in_image) num_threads(4)
     for (int i_top = 0; i_top < height - 4; i_top++) {
         for (int j_left = 0; j_left < width - 4; j_left++) {
-            // Sliding window
-            float image_piece [5][5];
-            // Output of matrix multiplication
-            float out [5][5];
             // Copy the 5x5 window into the image into a local matrix
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 5; j++) {
@@ -152,9 +144,7 @@ void alt_gaussian() {
             // Divide by 159 and then copy the central pixel of the output matrix into the output buffer
             gaussian_filter_buffer[index(i_top + 2, j_left + 2)] = out[2][2] / 159.0f;
             // Update maxium brightness
-            if (max_in_image < out[2][2]) {
-                max_in_image = out[2][2];
-            }
+            max_in_image = std::max(max_in_image, out[2][2]);
         }
     }
     // Normalise to avoid darkness
@@ -183,11 +173,22 @@ void process_image() {
 }
 
 void grad_dir() {
+	float sobel_convolve_x [3][3] = {
+	    { 1.0f, 0.0f, -1.0f },
+	    { 2.0f, 0.0f, -2.0f },
+	    { 1.0f, 0.0f, -1.0f }
+	};
+	
+	float sobel_convolve_y [3][3] = {
+	    { 1.0f, 2.0f, 1.0f },
+	    { 0.0f, 0.0f, 0.0f },
+	    { -1.0f, -2.0f, -1.0f }
+	};
     float max_in_image = 0.0f;
     float image_piece [3][3];
     float out_x [3][3];
     float out_y [3][3];
-    Direction out_direction [3][3];
+	#pragma omp parallel for shared(height, width, gaussian_filter_buffer, gradient_buffer, direction_buffer, sobel_convolve_x, sobel_convolve_y) private(image_piece, out_x, out_y) reduction(max:max_in_image) num_threads(4)
     for (int i_top = 0; i_top < height - 2; i_top++) {
         for (int j_left = 0; j_left < width - 2; j_left++) {
 
@@ -199,9 +200,7 @@ void grad_dir() {
             matrix_multiply_3x3(sobel_convolve_x, image_piece, out_x);
             matrix_multiply_3x3(sobel_convolve_y, image_piece, out_y);
             gradient_buffer[index(i_top + 1, j_left + 1)] = sqrt(out_x[1][1] * out_x[1][1] + out_y[1][1] * out_y[1][1]);
-            if (gradient_buffer[index(i_top + 1, j_left + 1)] > max_in_image) {
-                max_in_image = gradient_buffer[index(i_top + 1, j_left + 1)];
-            }
+            max_in_image = std::max(max_in_image, gradient_buffer[index(i_top + 1, j_left + 1)]);
             double direction_d = 0.0;
             double gx = out_x[1][1];
             if (gx == 0.0) {
@@ -223,6 +222,9 @@ void grad_dir() {
                 direction = NORTH;
             }
             direction_buffer[index(i_top + 1, j_left + 1)] = direction;
+			if (i_top == 4 && j_left == 4) {
+				printf("OMP THREADS: %d\n", omp_get_num_threads());
+			}
         }
     }
 
@@ -240,6 +242,7 @@ void grad_dir() {
 
 void suppress() {
     float gradient_piece [3][3];
+	#pragma omp parallel for shared(height, width, gradient_buffer, direction_buffer, suppression_buffer) private(gradient_piece) reduction(max:hysteresis_max) num_threads(4)
     for (int i_top = 2; i_top < height - 2 - 2; i_top++) {
         for (int j_left = 2; j_left < width - 2 - 2; j_left++) {
             for (int i = 0; i < 3; i++) {
@@ -269,9 +272,7 @@ void suppress() {
                 suppression_buffer[index(i_top + 1, j_left + 1)] = 0.0f;
             }
 
-            if (hysteresis_max < current_gradient) {
-                hysteresis_max = current_gradient;
-            }
+            hysteresis_max = std::max(hysteresis_max, current_gradient);
         }
     }
 }
@@ -307,6 +308,7 @@ bool has_strong_neighbour(int i, int j) {
 }
 
 void hysteresis() {
+	#pragma omp parallel for shared(height, width, strong_edge_buffer, suppression_buffer) num_threads(4)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             float current_pixel = suppression_buffer[index(i, j)];
@@ -320,6 +322,7 @@ void hysteresis() {
             }
         }
     }
+	#pragma omp parallel for shared(height, width, strong_edge_buffer, suppression_buffer, final_buffer) num_threads(4)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             float current_pixel = suppression_buffer[index(i, j)];
@@ -346,14 +349,14 @@ void write_image(float* input_buffer) {
     out_buffer = new unsigned char [width * height];
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            printf("%f ", input_buffer[index(i, j)]);
+            // printf("%f ", input_buffer[index(i, j)]);
             out_buffer[index(i, j)] = (unsigned char) input_buffer[index(i, j)];
         }
         //printf("\n");
     }
     FILE* outfile = fopen("out/out.pgm", "wb");
-    fprintf(outfile, "P5\n%d\n%d\n255\n", width, height);
-    fwrite(out_buffer, 1, width * height, outfile);
+    fprintf(outfile, "P5\n%d\n%d\n255\n", width, height - 3);
+    fwrite(out_buffer + 3 * width, 1, width * height - (3 * width), outfile);
 }
 
 void test_gaussian_filter(){
