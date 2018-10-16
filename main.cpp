@@ -170,17 +170,6 @@ void alt_gaussian() {
     }
 }
 
-void process_image() {
-    fprintf(stderr, "Processing image\n");
-    // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
-    // Create array #2 (floats) for gradient and array #3 (chars) for direction
-    // Step 1: 5 * 5 guassian blurring
-    // Step 2: Get gradient and direction arrays
-    // Step 3: Do the non-maximum suppression
-    // Step 4: Thresholding (pixel by pixel)
-    // Step 5: Write to file
-}
-
 void grad_dir() {
     float sobel_convolve_x [3][3] = {
         { 1.0f, 0.0f, -1.0f },
