@@ -4,6 +4,13 @@
 #include <cstdio>
 #include <algorithm>
 
+enum Direction {
+    EAST = 0,
+    NORTHEAST = 45,
+    NORTH = 90,
+    NORTHWEST = 135
+};
+
 upng_t* upng = NULL;
 float* original_image_buffer;
 float* gaussian_filter_buffer;
@@ -12,22 +19,13 @@ float* suppression_buffer;
 bool* strong_edge_buffer;
 float* final_buffer;
 float hysteresis_max = 0.0f;
-
-
-float low_threshold = 0.12;
-float high_threshold = 0.24;
-
-enum Direction {
-    EAST = 0,
-    NORTHEAST = 45,
-    NORTH = 90,
-    NORTHWEST = 135
-};
-
 Direction* direction_buffer;
 
+char* input_filename;
 int width;
 int height;
+float low_threshold = 0.12;
+float high_threshold = 0.24;
 
 inline int index(int i, int j) {
     return (i * width) + j;
@@ -52,15 +50,15 @@ void matrix_multiply_5x5(float left[5][5], float right[5][5], float out[5][5]) {
 // Load image into upng pointer
 // Set width and height
 void load_image() {
-    printf("Loading image\n");
-    upng = upng_new_from_file("img/lion.png");
+    fprintf(stderr, "Loading image\n");
+    upng = upng_new_from_file(input_filename);
     if (NULL != upng) {
         upng_decode(upng);
         if (UPNG_EOK == upng_get_error(upng)) {
             width = upng_get_width(upng);
             height = upng_get_height(upng);
-            printf("Height: %d, Width: %d\n", height, width);
-            printf("Bits per pixel: %d, Format: %d\n", upng_get_bpp(upng), upng_get_format(upng));
+            fprintf(stderr, "Height: %d, Width: %d\n", height, width);
+            fprintf(stderr, "Bits per pixel: %d, Format: %d\n", upng_get_bpp(upng), upng_get_format(upng));
         }
     }
 }
@@ -77,7 +75,7 @@ void convert_image() {
     final_buffer = new float [width * height];
 
 
-    printf("Converting image\n");
+    fprintf(stderr, "Converting image\n");
     const unsigned char* png_buffer = upng_get_buffer(upng);
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -127,7 +125,7 @@ void alt_gaussian() {
     // Output of matrix multiplication
     float out [5][5];
     // For every top-left corner of a 5x5 sliding window over the input image
-    #pragma omp parallel for shared(height, width, original_image_buffer, gaussian_filter_buffer, gaussian_filter_matrix) private(image_piece, out) reduction(max:max_in_image) num_threads(4)
+    #pragma omp parallel for shared(height, width, original_image_buffer, gaussian_filter_buffer, gaussian_filter_matrix) private(image_piece, out) reduction(max:max_in_image) schedule(dynamic)
     for (int i_top = 0; i_top < height - 4; i_top++) {
         for (int j_left = 0; j_left < width - 4; j_left++) {
             // Copy the 5x5 window into the image into a local matrix
@@ -151,6 +149,7 @@ void alt_gaussian() {
     if (max_in_image != 0.0f) {
         scaling_factor = 255.0f / max_in_image;
     }
+	#pragma omp parallel for shared(height, width, gaussian_filter_buffer, scaling_factor) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             gaussian_filter_buffer[index(i, j)] *= scaling_factor;
@@ -159,7 +158,7 @@ void alt_gaussian() {
 }
 
 void process_image() {
-    printf("Processing image\n");
+    fprintf(stderr, "Processing image\n");
     // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
     // Create array #2 (floats) for gradient and array #3 (chars) for direction
     // Step 1: 5 * 5 guassian blurring
@@ -185,7 +184,7 @@ void grad_dir() {
     float image_piece [3][3];
     float out_x [3][3];
     float out_y [3][3];
-    #pragma omp parallel for shared(height, width, gaussian_filter_buffer, gradient_buffer, direction_buffer, sobel_convolve_x, sobel_convolve_y) private(image_piece, out_x, out_y) reduction(max:max_in_image) num_threads(4)
+    #pragma omp parallel for shared(height, width, gaussian_filter_buffer, gradient_buffer, direction_buffer, sobel_convolve_x, sobel_convolve_y) private(image_piece, out_x, out_y) reduction(max:max_in_image) schedule(dynamic)
     for (int i_top = 0; i_top < height - 2; i_top++) {
         for (int j_left = 0; j_left < width - 2; j_left++) {
 
@@ -220,7 +219,7 @@ void grad_dir() {
             }
             direction_buffer[index(i_top + 1, j_left + 1)] = direction;
             if (i_top == 4 && j_left == 4) {
-                printf("OMP THREADS: %d\n", omp_get_num_threads());
+                fprintf(stderr, "OMP threads: %d\n", omp_get_num_threads());
             }
         }
     }
@@ -229,7 +228,7 @@ void grad_dir() {
     if (max_in_image != 0.0f) {
         scaling_factor = 255.0f / max_in_image;
     }
-
+	#pragma omp parallel for shared(height, width, gaussian_filter_buffer, scaling_factor) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             gradient_buffer[index(i, j)] *= scaling_factor;
@@ -239,7 +238,7 @@ void grad_dir() {
 
 void suppress() {
     float gradient_piece [3][3];
-    #pragma omp parallel for shared(height, width, gradient_buffer, direction_buffer, suppression_buffer) private(gradient_piece) reduction(max:hysteresis_max) num_threads(4)
+    #pragma omp parallel for shared(height, width, gradient_buffer, direction_buffer, suppression_buffer) private(gradient_piece) reduction(max:hysteresis_max) schedule(dynamic)
     for (int i_top = 2; i_top < height - 2 - 2; i_top++) {
         for (int j_left = 2; j_left < width - 2 - 2; j_left++) {
             for (int i = 0; i < 3; i++) {
@@ -305,7 +304,7 @@ bool has_strong_neighbour(int i, int j) {
 }
 
 void hysteresis() {
-    #pragma omp parallel for shared(height, width, strong_edge_buffer, suppression_buffer) num_threads(4)
+    #pragma omp parallel for shared(height, width, strong_edge_buffer, suppression_buffer) schedule(dynamic) 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             float current_pixel = suppression_buffer[index(i, j)];
@@ -319,7 +318,7 @@ void hysteresis() {
             }
         }
     }
-    #pragma omp parallel for shared(height, width, strong_edge_buffer, suppression_buffer, final_buffer) num_threads(4)
+    #pragma omp parallel for shared(height, width, strong_edge_buffer, suppression_buffer, final_buffer) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             float current_pixel = suppression_buffer[index(i, j)];
@@ -342,14 +341,15 @@ void hysteresis() {
 unsigned char* out_buffer;
 
 void write_image(float* input_buffer) {
-    printf("Writing image\n");
+    fprintf(stderr, "Writing image\n");
     out_buffer = new unsigned char [width * height];
+	#pragma omp parallel for shared(height, width, out_buffer, input_buffer) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            // printf("%f ", input_buffer[index(i, j)]);
+            // fprintf(stderr, "%f ", input_buffer[index(i, j)]);
             out_buffer[index(i, j)] = (unsigned char) input_buffer[index(i, j)];
         }
-        //printf("\n");
+        //fprintf(stderr, "\n");
     }
     FILE* outfile = fopen("out/out.pgm", "wb");
     if (outfile == NULL) {
@@ -357,6 +357,7 @@ void write_image(float* input_buffer) {
     } else {
         fprintf(outfile, "P5\n%d\n%d\n255\n", width, height);
         fwrite(out_buffer, 1,  width * height, outfile);
+		fclose(outfile);
     }
 }
 
@@ -369,12 +370,29 @@ void test_gaussian_filter(){
     {
         for(int j=0;j<width;j++)
         {
-            printf("%f, ",gaussian_filter_buffer[index(i,j)]);
+            fprintf(stderr, "%f, ",gaussian_filter_buffer[index(i,j)]);
         }
     }
 }
 int main(int argc, char** argv) {
 // test_gaussian_filter();
+    double start_time = omp_get_wtime();
+	input_filename = argv[1];
+	if (argc == 4) {
+		float input_low = atof(argv[2]);
+		if (input_low > 0.0) {
+			low_threshold = input_low;
+		}
+		float input_high = atof(argv[3]);
+		if (input_high > 0.0) {
+			if (input_high > low_threshold) {
+				high_threshold = input_high;
+			} else {
+				high_threshold = 1.1 * low_threshold;
+				high_threshold = std::min(high_threshold, 1.0f);
+			}
+		}
+	}
     load_image();
     convert_image();
     alt_gaussian();
@@ -383,6 +401,7 @@ int main(int argc, char** argv) {
     hysteresis();
     // process_image();
     write_image(final_buffer);
+	printf("%.2f\n", omp_get_wtime() - start_time);
 //    upng_free(upng);
     return 0;
 }

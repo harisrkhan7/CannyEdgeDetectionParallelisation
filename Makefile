@@ -8,4 +8,4 @@ upng_o: upng/upng.cpp
 move_upng: 
 	mv upng/upng.c upng/upng.cpp || true
 run:
-	./output.out
+	./output.out img/baboon.png 0.2 0.4
