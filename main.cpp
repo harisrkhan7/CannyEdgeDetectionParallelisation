@@ -381,43 +381,44 @@ void test_gaussian_filter(){
         }
     }
 }
-
-void process_image() {
-    printf("Processing image\n");
-    // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
-    // Create array #2 (floats) for gradient and array #3 (chars) for direction
-    // Step 1: 5 * 5 guassian blurring
-    // Step 2: Get gradient and direction arrays
-    // Step 3: Do the non-maximum suppression
-    // Step 4: Thresholding (pixel by pixel)
-    // Step 5: Write to file
-int main(int argc, char** argv) {
-// test_gaussian_filter();
-    double start_time = omp_get_wtime();
-    input_filename = argv[1];
-    if (argc == 4) {
-        float input_low = atof(argv[2]);
-        if (input_low > 0.0) {
-            low_threshold = input_low;
-        }
-        float input_high = atof(argv[3]);
-        if (input_high > 0.0) {
-            if (input_high > low_threshold) {
-                high_threshold = input_high;
-            } else {
-                high_threshold = 1.1 * low_threshold;
-                high_threshold = std::min(high_threshold, 1.0f);
-            }
-        }
-    }
-    load_image();
-    prepare_memory();
-    convert_image();
-    alt_gaussian();
-    grad_dir();
-    suppress();
-    hysteresis();
-}
+//
+//void process_image() {
+//    printf("Processing image\n");
+//    // Pad to nearest multiple of 15 AND CONVERT TO FLOAT ARRAY
+//    // Create array #2 (floats) for gradient and array #3 (chars) for direction
+//    // Step 1: 5 * 5 guassian blurring
+//    // Step 2: Get gradient and direction arrays
+//    // Step 3: Do the non-maximum suppression
+//    // Step 4: Thresholding (pixel by pixel)
+//    // Step 5: Write to file
+//}
+//int main(int argc, char** argv) {
+//// test_gaussian_filter();
+//    double start_time = omp_get_wtime();
+//    input_filename = argv[1];
+//    if (argc == 4) {
+//        float input_low = atof(argv[2]);
+//        if (input_low > 0.0) {
+//            low_threshold = input_low;
+//        }
+//        float input_high = atof(argv[3]);
+//        if (input_high > 0.0) {
+//            if (input_high > low_threshold) {
+//                high_threshold = input_high;
+//            } else {
+//                high_threshold = 1.1 * low_threshold;
+//                high_threshold = std::min(high_threshold, 1.0f);
+//            }
+//        }
+//    }
+//    load_image();
+//    prepare_memory();
+//    convert_image();
+//    alt_gaussian();
+//    grad_dir();
+//    suppress();
+//    hysteresis();
+//}
 
 int main(int argc, char** argv) {
     // Initialize the MPI environment
@@ -450,7 +451,7 @@ int main(int argc, char** argv) {
     if (world_size == 1) {
         printf("\nWorld Size is 1!");
         if (world_rank == 0) {
-            process_image();
+        
             write_image(final_buffer,0,false);
         }
         MPI_Barrier(MPI_COMM_WORLD);
