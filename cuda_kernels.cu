@@ -1,12 +1,13 @@
 #ifndef OUR_INDEX
 #define OUR_INDEX
-inline int index(int i, int j) {
-    return (i * width) + j;
-}
+//inline int index(int width, int i, int j) {
+//    return (i * width) + j;
+//}
+#define INDEX(width, i, j) (i * width) + j
 #endif
 
 __global__
-void alt_gaussian(int height, int width, float* raw_buffer, float* filter_buffer) {
+void __alt_gaussian__(int height, int width, float* raw_buffer, float* filter_buffer) {
     float left [5][5] = {
         {2, 4, 5, 4, 2},
         {4, 9, 12, 9, 4},
@@ -23,7 +24,7 @@ void alt_gaussian(int height, int width, float* raw_buffer, float* filter_buffer
 
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 5; j++) {
-                    right[i][j] = raw_buffer[index(i_top + i, j_left + j)];
+                    right[i][j] = raw_buffer[INDEX(width, i_top + i, j_left + j)];
                 }
             }
 
@@ -33,7 +34,16 @@ void alt_gaussian(int height, int width, float* raw_buffer, float* filter_buffer
                 }
             }
 
-            filter_buffer[index(i_top + 2, j_left + 2)] = out[2][2];
+            filter_buffer[INDEX(width, i_top + 2, j_left + 2)] = out[2][2];
         }
     }
+}
+
+extern "C" alt_gaussio(int height, int width, float* raw_buffer, float* filter_buffer) {
+    float* cuda_raw;
+    float* cuda_filter;
+    cudaMalloc(&cuda_raw, height * width * sizeof(float));
+    cudaMalloc(&cuda_filter, height * width * sizeof(float));
+    __alt_guassian__<<<width * height / 256, 256>>>(height, width, cuda_raw, cuda_filter);
+    cudaMemcpy(filter_buffer, cuda_filter, height * width * sizeof(float), cudaMemcpyDeviceToHost);
 }

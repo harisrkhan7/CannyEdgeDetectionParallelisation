@@ -12,7 +12,7 @@ make
 num_threads_arr=("1" "2" "3" "4" "5" "6" "7" "8")
 filename_arr=("img/smallwheel.png" "img/wheel.png" "img/baboon.png" "img/elephant.png" "img/lion.png" "img/gazelle.png" "img/giraffe.png")
 
-echo "filename,width,height,size,omp_num_threads,time(s)"
+echo "filename,width,height,size,mpi_processes,omp_num_threads,time_for_1(s),time_for_2(s)"
 for img_name in "${filename_arr[@]}"; do
     for num_threads in "${num_threads_arr[@]}"; do
         elapsed_time="$(OMP_NUM_THREADS=$num_threads ./output.out $img_name 2> /dev/null)"
@@ -24,6 +24,8 @@ for img_name in "${filename_arr[@]}"; do
         img_height="$(head -n 2 out/out.pgm | tail -1)"
         echo -n $img_height
         echo -n ","
+		echo -n "4"
+		echo -n ","
         echo -n $num_threads
         echo -n ","
         echo $elapsed_time
