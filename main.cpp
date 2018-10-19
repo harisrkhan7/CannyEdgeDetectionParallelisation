@@ -318,7 +318,7 @@ void hysteresis() {
 unsigned char* out_buffer;
 
 void write_image(float* input_buffer, unsigned int leave_out, bool append) {
-    printf("Writing image\n");
+    //printf("Writing image\n");
     out_buffer = new unsigned char [width * height];
     #pragma omp parallel for shared(height, width, out_buffer, input_buffer) schedule(dynamic)
     for (int i = 0; i < height; i++) {
@@ -345,6 +345,8 @@ void write_image(float* input_buffer, unsigned int leave_out, bool append) {
 int main(int argc, char** argv) {
     // Initialize the MPI environment
     MPI_Init(&argc, &argv);
+
+    double start_time = omp_get_wtime();
 
     input_filename = argv[1];
     
@@ -385,6 +387,7 @@ int main(int argc, char** argv) {
         if (world_rank == 0) {
             write_image(final_buffer, 0, false);
         }
+	printf("%f\n", omp_get_wtime() - start_time);
         MPI_Barrier(MPI_COMM_WORLD);
         MPI_Finalize();
         return 0;
@@ -470,6 +473,8 @@ int main(int argc, char** argv) {
         int ack = 0;
         MPI_Send(&ack, 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
         
+	printf("%f\n", omp_get_wtime() - start_time);
+
         //Wait for all processes to finish and terminate
         MPI_Barrier(MPI_COMM_WORLD);
         MPI_Finalize();
