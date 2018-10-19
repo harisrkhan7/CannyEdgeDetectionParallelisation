@@ -10,4 +10,4 @@ move_upng:
 run:
 	./output.out img/lion.png
 mpirun:
-	mpirun -np 4 ./output.out img/lion.png
+	OMPI_MCA_btl=^vader mpirun -np 4 ./output.out img/lion.png
