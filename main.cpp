@@ -343,15 +343,15 @@ void hysteresis() {
 unsigned char* out_buffer;
 
 void write_image(float* input_buffer, unsigned int leave_out, bool append) {
-    printf("Writing image\n");
+    // printf("Writing image\n");
     out_buffer = new unsigned char [width * height];
     #pragma omp parallel for shared(height, width, out_buffer, input_buffer) schedule(dynamic)
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            // fprintf(stderr, "%f ", input_buffer[index(i, j)]);
+            // f// printf(stderr, "%f ", input_buffer[index(i, j)]);
             out_buffer[index(i, j)] = (unsigned char) input_buffer[index(i, j)];
         }
-        //fprintf(stderr, "\n");
+        //f// printf(stderr, "\n");
     }
     
     if (append == false) {
@@ -451,7 +451,7 @@ int main(int argc, char** argv) {
     // If the world size is 1, just do everything in this process and then exit
     // This MUST be before the world size stuff below
     if (world_size == 1) {
-        printf("\nWorld Size is 1!");
+        // printf("\nWorld Size is 1!");
         if (world_rank == 0) {
             
             write_image(final_buffer,0,false);
@@ -462,7 +462,7 @@ int main(int argc, char** argv) {
     }
     
     if(world_rank == 0){
-        printf("\nRank =0 --> Starting!");
+        // printf("\nRank =0 --> Starting!");
         load_image();
         prepare_memory();
         convert_image();
@@ -471,21 +471,21 @@ int main(int argc, char** argv) {
         
         int resolution[2] = {width,height};
         
-        printf("Sending broadcast message!\n");
-		printf("Height: %d, Width: %d in rank 0\n", height, width);
+        // printf("Sending broadcast message!\n");
+		// printf("Height: %d, Width: %d in rank 0\n", height, width);
         
         MPI_Bcast(&resolution,2,MPI_INT,world_rank,MPI_COMM_WORLD);
         
         num_rows_per_process = height/world_size;
         
 //        original_image_buffer = new float[(100*100)];
-//        printf("Populating the image");
+//        // printf("Populating the image");
 //        for(float i=0;i<(100*100);i++)
 //        {
 //            original_image_buffer[(int)i]=i;
 //        }
         
-        printf("\nAfter Convert Image!");
+        // printf("\nAfter Convert Image!");
         //Divide and send data to every processor 
         int num_rows_to_send = num_rows_per_process + (2 * num_extra_rows);
         
@@ -506,7 +506,7 @@ int main(int argc, char** argv) {
             total_processors = world_size - 1;
         }
 
-        printf("\nOriginal Buffer Index Before %d",original_buffer_index);
+        // printf("\nOriginal Buffer Index Before %d",original_buffer_index);
         //Start from rank 1 as rank 0 is master process itself
         //Leave the last process out in case not completely divisible
         for(int destination = 1;destination<total_processors;destination++){
@@ -520,20 +520,20 @@ int main(int argc, char** argv) {
                 sending_buffer[i] = original_image_buffer[original_buffer_index];
             }
             
-            printf("\nSending buffer to:%d of length %d",destination,total_items_to_send);
+            // printf("\nSending buffer to:%d of length %d",destination,total_items_to_send);
             MPI_Send(sending_buffer, total_items_to_send, MPI_FLOAT, destination, 0, MPI_COMM_WORLD);
-            printf("\nSent buffer to:%d",destination);
+            // printf("\nSent buffer to:%d",destination);
             if(destination != (world_size -1))
             {
                 original_buffer_index -= 2 * num_extra_rows * width;     
             }
-            printf("\nOriginal Buffer Index After %d",original_buffer_index);
+            // printf("\nOriginal Buffer Index After %d",original_buffer_index);
         }
         
         //Send last processor more work if it can't be evenly divided
         if((height%world_size)!=0)
         {
-            printf("\nLast Processor will get uneven load!");
+            // printf("\nLast Processor will get uneven load!");
             
             //Give the remaining work to the last processor
             int last_processor_rank = world_rank - 1;
@@ -541,7 +541,7 @@ int main(int argc, char** argv) {
             int num_rows_for_last_processor = height - (num_rows_per_process * (world_size -  1))+num_extra_rows;
             total_items_to_send = num_rows_for_last_processor * width;
             sending_buffer = new float[total_items_to_send];
-            printf("\nSending Buffer size %d",total_items_to_send);
+            // printf("\nSending Buffer size %d",total_items_to_send);
             
             for(int i=0;i<total_items_to_send;i++,original_buffer_index++)
             {
@@ -550,12 +550,12 @@ int main(int argc, char** argv) {
             
             int destination = world_size - 1;
             MPI_Send(sending_buffer, total_items_to_send, MPI_FLOAT, destination, 0, MPI_COMM_WORLD);
-            printf("\nSent Buffer size %d to rank %d",total_items_to_send,destination);
+            // printf("\nSent Buffer size %d to rank %d",total_items_to_send,destination);
         }
         
 //        height = num_rows_per_process;
         //Compute Master Chunk 
-        printf("\nComputing Master");
+        // printf("\nComputing Master");
         alt_gaussian();
         grad_dir();
         suppress();
@@ -572,7 +572,7 @@ int main(int argc, char** argv) {
         int total_items_to_recv = (global_height/4)*global_width;
         int source;
         int final_buffer_position=0;
-        printf("Master will receive from %d processors",total_processors);
+        // printf("Master will receive from %d processors",total_processors);
         for(int i=1;i<total_processors;i++){
             temp_buffer = new float[global_height/4];
             MPI_Recv(&temp_buffer, total_items_to_recv, MPI_FLOAT, i, 1, MPI_COMM_WORLD, &status);
@@ -594,7 +594,7 @@ int main(int argc, char** argv) {
             
             total_items_to_recv = num_rows_for_last_processor * width;
             temp_buffer = new float[total_items_to_recv];
-            printf("Master wants to receive %d from last process",total_items_to_recv);
+            // printf("Master wants to receive %d from last process",total_items_to_recv);
             fflush(stdout);
             
             MPI_Recv(&temp_buffer, total_items_to_recv, MPI_FLOAT, last_processor_rank, 1, MPI_COMM_WORLD, &status);
@@ -612,11 +612,11 @@ int main(int argc, char** argv) {
         write_image(final_buffer,0,true);
         //Wait for all processes to finish and terminate
         MPI_Barrier(MPI_COMM_WORLD);
-        printf("\n Finalising Master");
+        // printf("\n Finalising Master");
         MPI_Finalize();
         }
     else if(world_rank == world_size-1){
-        printf("\nProcess %d started!",world_rank);
+        // printf("\nProcess %d started!",world_rank);
         int resolution[2];
         MPI_Bcast(&resolution,2 ,MPI_INT ,0, MPI_COMM_WORLD);
         width = resolution[0];
@@ -644,12 +644,12 @@ int main(int argc, char** argv) {
         prepare_memory();
     
         //original_image_buffer = new float[total_items_to_recv];
-        printf("\nProcess %d attempting to receive %d",world_rank,total_items_to_recv);
+//        // // printf("\nProcess %d attempting to receive %d",world_rank,total_items_to_recv);
         MPI_Recv(original_image_buffer, total_items_to_recv, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, &status);
-        printf("\nProcess %d received %d",world_rank,total_items_to_recv);
+//        // // printf("\nProcess %d received %d",world_rank,total_items_to_recv);
         //Compute Image 
         
-        printf("\nComputing Last ");
+//        // // printf("\nComputing Last ");
         
         alt_gaussian();
         grad_dir();
@@ -657,15 +657,17 @@ int main(int argc, char** argv) {
         hysteresis();
         //Wait for Ack from Previous Process
         
-        
+//        // // printf("\nAfter Computing Last");
         int total_items_to_send;
         //Send results back to master
+        
         if((height%world_size)!=0)
         {
             //Give the remaining work to the last processor
-            int num_rows_from_last_processor = global_height - (num_rows_per_process * (world_size -  1));
+            int num_rows_from_last_processor = global_height - ((global_height/world_size) * (world_size -  1));
                 
             total_items_to_send = num_rows_from_last_processor * width;
+         
             
         }
         else
@@ -674,7 +676,7 @@ int main(int argc, char** argv) {
         }
         float *sending_buffer = new float[total_items_to_send];
         int final_buffer_position;
-
+        
         for(int i=0;i<total_items_to_send;i++)
         {
             final_buffer_position = i + (num_extra_rows * global_width);
@@ -686,7 +688,7 @@ int main(int argc, char** argv) {
         
         //Wait for all processes to finish and terminate
         MPI_Barrier(MPI_COMM_WORLD);
-        printf("\n Finalising Last");
+        // // printf("\n Finalising Last");
         MPI_Finalize();
         
         
@@ -699,20 +701,20 @@ int main(int argc, char** argv) {
         height = resolution[1];
         num_rows_per_process = height/world_size;
         
-        printf("\nProcess %d started!",world_rank);
-        printf("\n Height:%d, WorldSize:%d",height, world_size);
+        // // printf("\nProcess %d started!",world_rank);
+        // printf("\n Height:%d, WorldSize:%d",height, world_size);
         total_items_to_recv = (height/world_size)*width;
         total_items_to_recv += (2*num_extra_rows * width);
-        printf("\nTotal Items to Receive %d",total_items_to_recv);
+        // printf("\nTotal Items to Receive %d",total_items_to_recv);
         height = num_rows_per_process;
         prepare_memory();
         //original_image_buffer = new float[total_items_to_recv];
-        printf("\nProcess %d attempting to receive %d",world_rank,total_items_to_recv);
+        // printf("\nProcess %d attempting to receive %d",world_rank,total_items_to_recv);
         MPI_Recv(original_image_buffer, total_items_to_recv, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, &status);
-        printf("\nProcess %d received %d",world_rank,total_items_to_recv);
+        // printf("\nProcess %d received %d",world_rank,total_items_to_recv);
         
         //Compute Image
-        printf("\nComputing Others");
+        // printf("\nComputing Others");
         alt_gaussian();
         grad_dir();
         suppress();
@@ -732,7 +734,7 @@ int main(int argc, char** argv) {
  
         //Wait for all processes to finish and terminate
         MPI_Barrier(MPI_COMM_WORLD);
-        printf("\n Finalising Rank %d",world_rank);
+        // printf("\n Finalising Rank %d",world_rank);
         MPI_Finalize();
     }
     

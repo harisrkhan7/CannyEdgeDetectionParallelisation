@@ -10,4 +10,4 @@ move_upng:
 run:
 	./output.out img/lion.png
 mpirun:
-	mpirun -np 4 ./output.out img/lion.png
+	mpirun -np 4 ./output.out img/smallwheel.png
