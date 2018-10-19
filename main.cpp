@@ -423,6 +423,8 @@ void test_gaussian_filter(){
 int main(int argc, char** argv) {
     // Initialize the MPI environment
     MPI_Init(&argc,&argv);
+
+	input_filename = argv[1];
     
     // Get the number of processes
     int world_size;
@@ -469,7 +471,8 @@ int main(int argc, char** argv) {
         
         int resolution[2] = {width,height};
         
-        printf("Sending broadcast message!");
+        printf("Sending broadcast message!\n");
+		printf("Height: %d, Width: %d in rank 0\n", height, width);
         
         MPI_Bcast(&resolution,2,MPI_INT,world_rank,MPI_COMM_WORLD);
         
