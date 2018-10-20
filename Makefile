@@ -1,6 +1,6 @@
 CC=mpic++
 all : move_upng main_o upng_o
-	$(CC) --std=c++14 -lstdc++ -lomp -lm -o output.out main.o upng.o
+	$(CC) --std=c++14 -lstdc++ -lgomp -lm -o output.out main.o upng.o
 main_o : main.cpp
 	$(CC) -Xpreprocessor -fopenmp -c main.cpp
 upng_o: upng/upng.cpp
