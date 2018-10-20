@@ -75,13 +75,13 @@ void load_image() {
 // Create gradient and direction buffers
 
 void prepare_memory() {
-    original_image_buffer = new float [width * (height + 6)];
-    gaussian_filter_buffer = new float [width * (height + 6)];
-    gradient_buffer = new float [width * (height + 6)];
-    direction_buffer = new Direction [width * (height + 6)];
-    suppression_buffer = new float [width * (height + 6)];
-    strong_edge_buffer = new bool [width * (height + 6)];
-    final_buffer = new float [width * (height + 6)];
+    original_image_buffer = new float [width * (height + 16)];
+    gaussian_filter_buffer = new float [width * (height + 16)];
+    gradient_buffer = new float [width * (height + 16)];
+    direction_buffer = new Direction [width * (height + 16)];
+    suppression_buffer = new float [width * (height + 16)];
+    strong_edge_buffer = new bool [width * (height + 16)];
+    final_buffer = new float [width * (height + 16)];
 }
 
 void convert_image() {
@@ -455,8 +455,15 @@ int main(int argc, char** argv) {
     if (world_size == 1) {
         // printf("\nWorld Size is 1!");
         if (world_rank == 0) {
-            
+            load_image();
+            prepare_memory();
+            convert_image();
+	    alt_gaussian();
+	    grad_dir();
+	    suppress();
+	    hysteresis();
             write_image(final_buffer,0,false);
+	    printf("%f\n", omp_get_wtime() - start_time);
         }
         MPI_Barrier(MPI_COMM_WORLD);
         MPI_Finalize();
@@ -557,7 +564,6 @@ int main(int argc, char** argv) {
         
 //        height = num_rows_per_process;
         //Compute Master Chunk 
-        // printf("\nComputing Master");
         alt_gaussian();
         grad_dir();
         suppress();
@@ -566,29 +572,30 @@ int main(int argc, char** argv) {
         write_image(final_buffer,num_extra_rows,false);
         
         //Collect results from all processes 
-        int num_rows_of_final_buffer = global_height - (global_height/4);
+        int num_rows_of_final_buffer = global_height - (global_height/world_size);
         int total_items_final_buffer = num_rows_of_final_buffer * global_width;
         final_buffer = new float[total_items_final_buffer];
         height = num_rows_of_final_buffer;
         float *temp_buffer;
-        int total_items_to_recv = (global_height/4)*global_width;
+        int total_items_to_recv = (global_height/world_size)*global_width;
         int source;
         int final_buffer_position=0;
         // printf("Master will receive from %d processors",total_processors);
         for(int i=1;i<total_processors;i++){
-            temp_buffer = new float[global_height/4];
-            MPI_Recv(&temp_buffer, total_items_to_recv, MPI_FLOAT, i, 1, MPI_COMM_WORLD, &status);
-                for(int i=0;i<total_items_to_recv;i++)
-                {
-                    final_buffer[final_buffer_position] = temp_buffer[i];
-                    final_buffer_position++;
-                }
+            temp_buffer = new float[total_items_to_recv];
+            MPI_Recv((final_buffer + final_buffer_position), total_items_to_recv, MPI_FLOAT, i, 1, MPI_COMM_WORLD, &status);
+	    final_buffer_position += total_items_to_recv;
+                //for(int i=0;i<total_items_to_recv;i++)
+                //{
+                //    final_buffer[final_buffer_position] = temp_buffer[i];
+                //    final_buffer_position++;
+                //}
         }
         
+
         //Collect results if the last process is has uneven workload
-        if((height%world_size)!=0)
+        if((global_height % world_size)!=0)
         {
-            
             //Give the remaining work to the last processor
             int last_processor_rank = world_rank - 1;
         
@@ -596,7 +603,6 @@ int main(int argc, char** argv) {
             
             total_items_to_recv = num_rows_for_last_processor * width;
             temp_buffer = new float[total_items_to_recv];
-            // printf("Master wants to receive %d from last process",total_items_to_recv);
             fflush(stdout);
             
             MPI_Recv(&temp_buffer, total_items_to_recv, MPI_FLOAT, last_processor_rank, 1, MPI_COMM_WORLD, &status);
@@ -617,11 +623,9 @@ int main(int argc, char** argv) {
 
 	printf("%f\n", omp_get_wtime() - start_time);
 
-        // printf("\n Finalising Master");
         MPI_Finalize();
         }
     else if(world_rank == world_size-1){
-        // printf("\nProcess %d started!",world_rank);
         int resolution[2];
         MPI_Bcast(&resolution,2 ,MPI_INT ,0, MPI_COMM_WORLD);
         width = resolution[0];
@@ -738,8 +742,9 @@ int main(int argc, char** argv) {
         MPI_Send(&sending_buffer, total_items_to_send, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
  
         //Wait for all processes to finish and terminate
+	//printf("Waiting for MPI barrier in Master\n");
         MPI_Barrier(MPI_COMM_WORLD);
-        // printf("\n Finalising Rank %d",world_rank);
+        //printf("\n Finalising Rank %d",world_rank);
         MPI_Finalize();
     }
     
