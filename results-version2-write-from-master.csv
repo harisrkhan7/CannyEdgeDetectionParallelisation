@@ -3,228 +3,228 @@ mpic++ -Xpreprocessor -fopenmp -c main.cpp
 mpic++ -c upng/upng.cpp
 mpic++ --std=c++14 -lstdc++ -lomp -lm -o output.out main.o upng.o
 filename,width,height,mpi_num_processes,omp_num_threads,time(s)
-img/smallwheel.png,0,0,1,1,
-img/smallwheel.png,0,0,1,2,
-img/smallwheel.png,0,0,1,3,
-img/smallwheel.png,0,0,1,4,
-img/smallwheel.png,0,0,1,5,
-img/smallwheel.png,0,0,1,6,
-img/smallwheel.png,0,0,1,7,
-img/smallwheel.png,0,0,1,8,
-img/smallwheel.png,64,64,2,1,0.013276
-img/smallwheel.png,64,64,2,2,0.015201
-img/smallwheel.png,64,64,2,3,0.002885
-img/smallwheel.png,64,64,2,4,0.002605
-img/smallwheel.png,64,64,2,5,0.002811
-img/smallwheel.png,64,64,2,6,0.003346
-img/smallwheel.png,64,64,2,7,0.002784
-img/smallwheel.png,64,64,2,8,0.003397
-img/smallwheel.png,64,64,3,1,0.029869
-img/smallwheel.png,64,64,3,2,0.015149
-img/smallwheel.png,64,64,3,3,0.002775
-img/smallwheel.png,64,64,3,4,0.002746
-img/smallwheel.png,64,64,3,5,0.003027
-img/smallwheel.png,64,64,3,6,0.149534
-img/smallwheel.png,64,64,3,7,0.202753
-img/smallwheel.png,64,64,3,8,0.179733
-img/smallwheel.png,64,64,4,1,0.036533
-img/smallwheel.png,64,64,4,2,0.009695
-img/smallwheel.png,64,64,4,3,0.003255
-img/smallwheel.png,64,64,4,4,0.002723
-img/smallwheel.png,64,64,4,5,0.214130
-img/smallwheel.png,64,64,4,6,0.243030
-img/smallwheel.png,64,64,4,7,0.236750
-img/smallwheel.png,64,64,4,8,0.221450
-img/wheel.png,0,0,1,1,
-img/wheel.png,0,0,1,2,
-img/wheel.png,0,0,1,3,
-img/wheel.png,0,0,1,4,
-img/wheel.png,0,0,1,5,
-img/wheel.png,0,0,1,6,
-img/wheel.png,0,0,1,7,
-img/wheel.png,0,0,1,8,
-img/wheel.png,256,256,2,1,0.038865
-img/wheel.png,256,256,2,2,0.029172
-img/wheel.png,256,256,2,3,0.016147
-img/wheel.png,256,256,2,4,0.014523
-img/wheel.png,256,256,2,5,0.013355
-img/wheel.png,256,256,2,6,0.013495
-img/wheel.png,256,256,2,7,0.013406
-img/wheel.png,256,256,2,8,0.012530
-img/wheel.png,256,256,3,1,0.055687
-img/wheel.png,256,256,3,2,0.023557
-img/wheel.png,256,256,3,3,0.017629
-img/wheel.png,256,256,3,4,0.015230
-img/wheel.png,256,256,3,5,0.015394
-img/wheel.png,256,256,3,6,0.132309
-img/wheel.png,256,256,3,7,0.206353
-img/wheel.png,256,256,3,8,0.214069
-img/wheel.png,256,256,4,1,0.071329
-img/wheel.png,256,256,4,2,0.047264
-img/wheel.png,256,256,4,3,0.031458
-img/wheel.png,256,256,4,4,0.017459
-img/wheel.png,256,256,4,5,0.211026
-img/wheel.png,256,256,4,6,0.216948
-img/wheel.png,256,256,4,7,0.208438
-img/wheel.png,256,256,4,8,0.224662
-img/baboon.png,0,0,1,1,
-img/baboon.png,0,0,1,2,
-img/baboon.png,0,0,1,3,
-img/baboon.png,0,0,1,4,
-img/baboon.png,0,0,1,5,
-img/baboon.png,0,0,1,6,
-img/baboon.png,0,0,1,7,
-img/baboon.png,0,0,1,8,
-img/baboon.png,1553,1709,2,1,1.342169
-img/baboon.png,1553,1709,2,2,0.822860
-img/baboon.png,1553,1709,2,3,0.614502
-img/baboon.png,1553,1709,2,4,0.559850
-img/baboon.png,1553,1709,2,5,0.494860
-img/baboon.png,1553,1709,2,6,0.489629
-img/baboon.png,1553,1709,2,7,0.468202
-img/baboon.png,1553,1709,2,8,0.469541
-img/baboon.png,1553,1709,3,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,3,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,3,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,3,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,3,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,3,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,3,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,3,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/baboon.png,1553,1709,4,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,0,0,1,1,
-img/elephant.png,0,0,1,2,
-img/elephant.png,0,0,1,3,
-img/elephant.png,0,0,1,4,
-img/elephant.png,0,0,1,5,
-img/elephant.png,0,0,1,6,
-img/elephant.png,0,0,1,7,
-img/elephant.png,0,0,1,8,
-img/elephant.png,3888,2592,2,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,2,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,2,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,2,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,2,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,2,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,2,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,2,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,3,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/elephant.png,3888,2592,4,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,0,0,1,1,
-img/lion.png,0,0,1,2,
-img/lion.png,0,0,1,3,
-img/lion.png,0,0,1,4,
-img/lion.png,0,0,1,5,
-img/lion.png,0,0,1,6,
-img/lion.png,0,0,1,7,
-img/lion.png,0,0,1,8,
-img/lion.png,763,645,2,1,0.256070
-img/lion.png,763,645,2,2,0.168477
-img/lion.png,763,645,2,3,0.122515
-img/lion.png,763,645,2,4,0.108226
-img/lion.png,763,645,2,5,0.100288
-img/lion.png,763,645,2,6,0.098660
-img/lion.png,763,645,2,7,0.085852
-img/lion.png,763,645,2,8,0.087623
-img/lion.png,763,645,3,1,0.273019
-img/lion.png,763,645,3,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,3,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,3,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,3,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,3,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,3,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,3,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/lion.png,763,645,4,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,0,0,1,1,
-img/gazelle.png,0,0,1,2,
-img/gazelle.png,0,0,1,3,
-img/gazelle.png,0,0,1,4,
-img/gazelle.png,0,0,1,5,
-img/gazelle.png,0,0,1,6,
-img/gazelle.png,0,0,1,7,
-img/gazelle.png,0,0,1,8,
-img/gazelle.png,450,464,2,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,2,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,2,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,2,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,2,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,2,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,2,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,2,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,3,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/gazelle.png,450,464,4,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,0,0,1,1,
-img/giraffe.png,0,0,1,2,
-img/giraffe.png,0,0,1,3,
-img/giraffe.png,0,0,1,4,
-img/giraffe.png,0,0,1,5,
-img/giraffe.png,0,0,1,6,
-img/giraffe.png,0,0,1,7,
-img/giraffe.png,0,0,1,8,
-img/giraffe.png,1211,800,2,1,0.557335
-img/giraffe.png,1211,800,2,2,0.325861
-img/giraffe.png,1211,800,2,3,0.247383
-img/giraffe.png,1211,800,2,4,0.218200
-img/giraffe.png,1211,800,2,5,0.210855
-img/giraffe.png,1211,800,2,6,0.190510
-img/giraffe.png,1211,800,2,7,0.197863
-img/giraffe.png,1211,800,2,8,0.190473
-img/giraffe.png,1211,800,3,1,0.553851
-img/giraffe.png,1211,800,3,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,3,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,3,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,3,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,3,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,3,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,3,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,1,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,2,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,3,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,4,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,5,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,6,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,7,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
-img/giraffe.png,1211,800,4,8,-------------------------------------------------------------------------- mpirun noticed that process rank 0 with PID 0 on node instance-3 exited on signal 11 (Segmentation fault). --------------------------------------------------------------------------
+img/smallwheel.png,0,0,1,1,0.007451
+img/smallwheel.png,0,0,1,2,0.004050
+img/smallwheel.png,0,0,1,3,0.004004
+img/smallwheel.png,0,0,1,4,0.004302
+img/smallwheel.png,0,0,1,5,0.004321
+img/smallwheel.png,0,0,1,6,0.004501
+img/smallwheel.png,0,0,1,7,0.004895
+img/smallwheel.png,0,0,1,8,0.004411
+img/smallwheel.png,64,64,2,1,0.020253
+img/smallwheel.png,64,64,2,2,0.003396
+img/smallwheel.png,64,64,2,3,0.005960
+img/smallwheel.png,64,64,2,4,0.003366
+img/smallwheel.png,64,64,2,5,0.003461
+img/smallwheel.png,64,64,2,6,0.010573
+img/smallwheel.png,64,64,2,7,0.006859
+img/smallwheel.png,64,64,2,8,0.021473
+img/smallwheel.png,64,64,3,1,0.025101
+img/smallwheel.png,64,64,3,2,0.031697
+img/smallwheel.png,64,64,3,3,0.004383
+img/smallwheel.png,64,64,3,4,0.004848
+img/smallwheel.png,64,64,3,5,0.015608
+img/smallwheel.png,64,64,3,6,0.211721
+img/smallwheel.png,64,64,3,7,0.136901
+img/smallwheel.png,64,64,3,8,0.229179
+img/smallwheel.png,64,64,4,1,0.040681
+img/smallwheel.png,64,64,4,2,0.033210
+img/smallwheel.png,64,64,4,3,0.013890
+img/smallwheel.png,64,64,4,4,0.018858
+img/smallwheel.png,64,64,4,5,0.216074
+img/smallwheel.png,64,64,4,6,0.212859
+img/smallwheel.png,64,64,4,7,0.232998
+img/smallwheel.png,64,64,4,8,0.245345
+img/wheel.png,0,0,1,1,0.041151
+img/wheel.png,0,0,1,2,0.026785
+img/wheel.png,0,0,1,3,0.026483
+img/wheel.png,0,0,1,4,0.017290
+img/wheel.png,0,0,1,5,0.013886
+img/wheel.png,0,0,1,6,0.026743
+img/wheel.png,0,0,1,7,0.013627
+img/wheel.png,0,0,1,8,0.011306
+img/wheel.png,256,256,2,1,0.060932
+img/wheel.png,256,256,2,2,0.031826
+img/wheel.png,256,256,2,3,0.022462
+img/wheel.png,256,256,2,4,0.019182
+img/wheel.png,256,256,2,5,0.018464
+img/wheel.png,256,256,2,6,0.015463
+img/wheel.png,256,256,2,7,0.018020
+img/wheel.png,256,256,2,8,0.118826
+img/wheel.png,256,256,3,1,0.053106
+img/wheel.png,256,256,3,2,0.029225
+img/wheel.png,256,256,3,3,0.021417
+img/wheel.png,256,256,3,4,0.024066
+img/wheel.png,256,256,3,5,0.019466
+img/wheel.png,256,256,3,6,0.062602
+img/wheel.png,256,256,3,7,0.210661
+img/wheel.png,256,256,3,8,0.209518
+img/wheel.png,256,256,4,1,0.070681
+img/wheel.png,256,256,4,2,0.058698
+img/wheel.png,256,256,4,3,0.059171
+img/wheel.png,256,256,4,4,0.120922
+img/wheel.png,256,256,4,5,0.208340
+img/wheel.png,256,256,4,6,0.160175
+img/wheel.png,256,256,4,7,0.233826
+img/wheel.png,256,256,4,8,0.225246
+img/baboon.png,0,0,1,1,1.457443
+img/baboon.png,0,0,1,2,0.938248
+img/baboon.png,0,0,1,3,0.720167
+img/baboon.png,0,0,1,4,0.544740
+img/baboon.png,0,0,1,5,0.497662
+img/baboon.png,0,0,1,6,0.456912
+img/baboon.png,0,0,1,7,0.446194
+img/baboon.png,0,0,1,8,0.428038
+img/baboon.png,1553,1709,2,1,1.557769
+img/baboon.png,1553,1709,2,2,0.993211
+img/baboon.png,1553,1709,2,3,0.678021
+img/baboon.png,1553,1709,2,4,0.621757
+img/baboon.png,1553,1709,2,5,0.551400
+img/baboon.png,1553,1709,2,6,0.475785
+img/baboon.png,1553,1709,2,7,0.487931
+img/baboon.png,1553,1709,2,8,0.480031
+img/baboon.png,1553,1709,3,1,1.573899
+img/baboon.png,1553,1709,3,2,0.906854
+img/baboon.png,1553,1709,3,3,0.781946
+img/baboon.png,1553,1709,3,4,0.727541
+img/baboon.png,1553,1709,3,5,0.667421
+img/baboon.png,1553,1709,3,6,0.629728
+img/baboon.png,1553,1709,3,7,0.700141
+img/baboon.png,1553,1709,3,8,0.682266
+img/baboon.png,1553,1709,4,1,1.541696
+img/baboon.png,1553,1709,4,2,1.033609
+img/baboon.png,1553,1709,4,3,0.838330
+img/baboon.png,1553,1709,4,4,0.779999
+img/baboon.png,1553,1709,4,5,0.650890
+img/baboon.png,1553,1709,4,6,0.793844
+img/baboon.png,1553,1709,4,7,0.841067
+img/baboon.png,1553,1709,4,8,0.826285
+img/elephant.png,0,0,1,1,5.403248
+img/elephant.png,0,0,1,2,3.157877
+img/elephant.png,0,0,1,3,2.376611
+img/elephant.png,0,0,1,4,2.037167
+img/elephant.png,0,0,1,5,1.792342
+img/elephant.png,0,0,1,6,1.559516
+img/elephant.png,0,0,1,7,1.463388
+img/elephant.png,0,0,1,8,1.418364
+img/elephant.png,3888,2592,2,1,5.590965
+img/elephant.png,3888,2592,2,2,3.580625
+img/elephant.png,3888,2592,2,3,2.545000
+img/elephant.png,3888,2592,2,4,2.122308
+img/elephant.png,3888,2592,2,5,2.041253
+img/elephant.png,3888,2592,2,6,1.953649
+img/elephant.png,3888,2592,2,7,1.825795
+img/elephant.png,3888,2592,2,8,1.798852
+img/elephant.png,3888,2592,3,1,5.874021
+img/elephant.png,3888,2592,3,2,3.373059
+img/elephant.png,3888,2592,3,3,2.638650
+img/elephant.png,3888,2592,3,4,2.385321
+img/elephant.png,3888,2592,3,5,2.209770
+img/elephant.png,3888,2592,3,6,2.108152
+img/elephant.png,3888,2592,3,7,2.180055
+img/elephant.png,3888,2592,3,8,2.122270
+img/elephant.png,3888,2592,4,1,5.839144
+img/elephant.png,3888,2592,4,2,3.491731
+img/elephant.png,3888,2592,4,3,2.930420
+img/elephant.png,3888,2592,4,4,2.618248
+img/elephant.png,3888,2592,4,5,2.432064
+img/elephant.png,3888,2592,4,6,2.531665
+img/elephant.png,3888,2592,4,7,2.326376
+img/elephant.png,3888,2592,4,8,2.363725
+img/lion.png,0,0,1,1,0.289653
+img/lion.png,0,0,1,2,0.184932
+img/lion.png,0,0,1,3,0.124743
+img/lion.png,0,0,1,4,0.115758
+img/lion.png,0,0,1,5,0.111915
+img/lion.png,0,0,1,6,0.089344
+img/lion.png,0,0,1,7,0.082276
+img/lion.png,0,0,1,8,0.078054
+img/lion.png,763,645,2,1,0.297649
+img/lion.png,763,645,2,2,0.176623
+img/lion.png,763,645,2,3,0.138159
+img/lion.png,763,645,2,4,0.114363
+img/lion.png,763,645,2,5,0.124754
+img/lion.png,763,645,2,6,0.112383
+img/lion.png,763,645,2,7,0.102608
+img/lion.png,763,645,2,8,0.217174
+img/lion.png,763,645,3,1,0.313385
+img/lion.png,763,645,3,2,0.189042
+img/lion.png,763,645,3,3,0.149410
+img/lion.png,763,645,3,4,0.128444
+img/lion.png,763,645,3,5,0.125047
+img/lion.png,763,645,3,6,0.259039
+img/lion.png,763,645,3,7,0.256005
+img/lion.png,763,645,3,8,0.234045
+img/lion.png,763,645,4,1,0.321028
+img/lion.png,763,645,4,2,0.181704
+img/lion.png,763,645,4,3,0.148012
+img/lion.png,763,645,4,4,0.157849
+img/lion.png,763,645,4,5,0.277367
+img/lion.png,763,645,4,6,0.255884
+img/lion.png,763,645,4,7,0.280210
+img/lion.png,763,645,4,8,0.283488
+img/gazelle.png,0,0,1,1,0.123818
+img/gazelle.png,0,0,1,2,0.077319
+img/gazelle.png,0,0,1,3,0.058272
+img/gazelle.png,0,0,1,4,0.051342
+img/gazelle.png,0,0,1,5,0.059308
+img/gazelle.png,0,0,1,6,0.049552
+img/gazelle.png,0,0,1,7,0.050369
+img/gazelle.png,0,0,1,8,0.041885
+img/gazelle.png,450,464,2,1,0.156387
+img/gazelle.png,450,464,2,2,0.091351
+img/gazelle.png,450,464,2,3,0.067784
+img/gazelle.png,450,464,2,4,0.051659
+img/gazelle.png,450,464,2,5,0.051361
+img/gazelle.png,450,464,2,6,0.051224
+img/gazelle.png,450,464,2,7,0.055025
+img/gazelle.png,450,464,2,8,0.223254
+img/gazelle.png,450,464,3,1,0.163025
+img/gazelle.png,450,464,3,2,0.077717
+img/gazelle.png,450,464,3,3,0.073465
+img/gazelle.png,450,464,3,4,0.113941
+img/gazelle.png,450,464,3,5,0.059397
+img/gazelle.png,450,464,3,6,0.219661
+img/gazelle.png,450,464,3,7,0.171134
+img/gazelle.png,450,464,3,8,0.224564
+img/gazelle.png,450,464,4,1,0.151454
+img/gazelle.png,450,464,4,2,0.122023
+img/gazelle.png,450,464,4,3,0.070353
+img/gazelle.png,450,464,4,4,0.072480
+img/gazelle.png,450,464,4,5,0.243376
+img/gazelle.png,450,464,4,6,0.243510
+img/gazelle.png,450,464,4,7,0.232390
+img/gazelle.png,450,464,4,8,0.262231
+img/giraffe.png,0,0,1,1,0.545706
+img/giraffe.png,0,0,1,2,0.331572
+img/giraffe.png,0,0,1,3,0.277349
+img/giraffe.png,0,0,1,4,0.224716
+img/giraffe.png,0,0,1,5,0.214332
+img/giraffe.png,0,0,1,6,0.192020
+img/giraffe.png,0,0,1,7,0.176896
+img/giraffe.png,0,0,1,8,0.187350
+img/giraffe.png,1211,800,2,1,0.597604
+img/giraffe.png,1211,800,2,2,0.348960
+img/giraffe.png,1211,800,2,3,0.277494
+img/giraffe.png,1211,800,2,4,0.253507
+img/giraffe.png,1211,800,2,5,0.230205
+img/giraffe.png,1211,800,2,6,0.229055
+img/giraffe.png,1211,800,2,7,0.210738
+img/giraffe.png,1211,800,2,8,0.218844
+img/giraffe.png,1211,800,3,1,0.617509
+img/giraffe.png,1211,800,3,2,0.343326
+img/giraffe.png,1211,800,3,3,0.310742
+img/giraffe.png,1211,800,3,4,0.317823
+img/giraffe.png,1211,800,3,5,0.250131
+img/giraffe.png,1211,800,3,6,0.295886
+img/giraffe.png,1211,800,3,7,0.292237
+img/giraffe.png,1211,800,3,8,0.482163
+img/giraffe.png,1211,800,4,1,0.619589
+img/giraffe.png,1211,800,4,2,0.442257
+img/giraffe.png,1211,800,4,3,0.346752
+img/giraffe.png,1211,800,4,4,0.287812
+img/giraffe.png,1211,800,4,5,0.325995
+img/giraffe.png,1211,800,4,6,0.301312
+img/giraffe.png,1211,800,4,7,0.368257
+img/giraffe.png,1211,800,4,8,0.478393
 BUTTS!
